@@ -1,0 +1,42 @@
+---
+code: new_llc_registration
+title: Nevada LLC Registration
+document_url: https://fly.storage.tigris.dev/neon-law-public/nevada/llc_formation_packet.pdf
+respondent_type: org
+document_type: pdf
+document_mappings:
+  'entity.name':
+    page: 2
+    upper_left:
+      - 300
+      - 300
+    lower_left:
+      - 300
+      - 400
+    upper_right:
+      - 400
+      - 300
+    lower_right:
+      - 400
+      - 400
+description: >
+  This questionnaire asks the questions required for creating an LLC in Nevada. Answers to questions will be used in the
+  document mappings to create SVGs used to fill out in the given PDF itself.
+flow:
+  BEGIN:
+    _: annual_or_amended
+  annual_or_amended:
+    _: org__entity
+  org__entity:
+    _: registered_agent
+  registered_agent:
+    _: END
+alignment:
+  BEGIN:
+    _: staff_review
+  staff_review:
+    _: signature__for_registered_agent
+  signature__for_registered_agent:
+    _: filed_with_sos
+  filed_with_sos:
+    _: END
