@@ -16,7 +16,8 @@ struct LintCommand: Command {
         // Validate directory exists
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
-              isDirectory.boolValue else {
+            isDirectory.boolValue
+        else {
             print("Error: '\(directoryPath)' is not a valid directory")
             throw CommandError.invalidDirectory(directoryPath)
         }
@@ -32,13 +33,17 @@ struct LintCommand: Command {
             print("✗ Found line length violations:\n")
 
             for fileViolation in result.violations {
-                let relativePath = url.path.isEmpty ? fileViolation.file.path :
-                    fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
+                let relativePath =
+                    url.path.isEmpty
+                    ? fileViolation.file.path
+                    : fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
                 print("\(relativePath):")
 
                 for violation in fileViolation.violations {
-                    print("  Line \(violation.lineNumber): \(violation.length) characters " +
-                          "(exceeds \(violation.maxLength))")
+                    print(
+                        "  Line \(violation.lineNumber): \(violation.length) characters "
+                            + "(exceeds \(violation.maxLength))"
+                    )
                 }
                 print("")
             }
@@ -47,8 +52,10 @@ struct LintCommand: Command {
                 print("\n🔧 Auto-fixing violations...\n")
 
                 for fileViolation in result.violations {
-                    let relativePath = url.path.isEmpty ? fileViolation.file.path :
-                        fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
+                    let relativePath =
+                        url.path.isEmpty
+                        ? fileViolation.file.path
+                        : fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
                     print("Fixing: \(relativePath)")
 
                     try await fixFile(fileViolation.file)
@@ -63,33 +70,37 @@ struct LintCommand: Command {
                 } else {
                     print("⚠️  Some violations could not be fixed automatically:")
                     for fileViolation in newResult.violations {
-                        let relativePath = url.path.isEmpty ? fileViolation.file.path :
-                            fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
+                        let relativePath =
+                            url.path.isEmpty
+                            ? fileViolation.file.path
+                            : fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
                         print("  \(relativePath): \(fileViolation.violations.count) violations remaining")
                     }
                     throw CommandError.lintFailed
                 }
             } else {
-                print("""
+                print(
+                    """
 
-                📝 Fix Instructions:
-                All lines in Markdown files must be ≤120 characters. To fix these violations:
+                    📝 Fix Instructions:
+                    All lines in Markdown files must be ≤120 characters. To fix these violations:
 
-                1. Break long lines at natural boundaries (spaces, punctuation)
-                2. Keep each line as close to 120 characters as possible without exceeding it
-                3. Maintain readability and proper Markdown formatting
-                4. For long URLs or code, consider using reference-style links
+                    1. Break long lines at natural boundaries (spaces, punctuation)
+                    2. Keep each line as close to 120 characters as possible without exceeding it
+                    3. Maintain readability and proper Markdown formatting
+                    4. For long URLs or code, consider using reference-style links
 
-                Example fix for a 150-character line:
-                Before: "This is an extremely long line that contains too many characters and needs to be broken up into
-                multiple lines for better readability."
-                After:  "This is an extremely long line that contains too many characters and needs to be broken up into
-                multiple
-                lines for better readability."
+                    Example fix for a 150-character line:
+                    Before: "This is an extremely long line that contains too many characters and needs to be broken up into
+                    multiple lines for better readability."
+                    After:  "This is an extremely long line that contains too many characters and needs to be broken up into
+                    multiple
+                    lines for better readability."
 
-                Run 'standards lint . --fix' to automatically fix these violations, or fix them manually and run \
-                'standards lint .' again to verify.
-                """)
+                    Run 'standards lint . --fix' to automatically fix these violations, or fix them manually and run \
+                    'standards lint .' again to verify.
+                    """
+                )
 
                 throw CommandError.lintFailed
             }
@@ -98,18 +109,18 @@ struct LintCommand: Command {
 
     private func fixFile(_ file: URL) async throws {
         let prompt = """
-        Fix the line length violations in the file at \(file.path).
+            Fix the line length violations in the file at \(file.path).
 
-        All lines in Markdown files must be ≤120 characters. Please:
+            All lines in Markdown files must be ≤120 characters. Please:
 
-        1. Break long lines at natural boundaries (spaces, punctuation)
-        2. Keep each line as close to 120 characters as possible without exceeding it
-        3. Maintain readability and proper Markdown formatting
-        4. For long URLs or code, consider using reference-style links
-        5. DO NOT change the meaning or content, only reformat for line length
+            1. Break long lines at natural boundaries (spaces, punctuation)
+            2. Keep each line as close to 120 characters as possible without exceeding it
+            3. Maintain readability and proper Markdown formatting
+            4. For long URLs or code, consider using reference-style links
+            5. DO NOT change the meaning or content, only reformat for line length
 
-        Edit the file to fix all line length violations.
-        """
+            Edit the file to fix all line length violations.
+            """
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/claude")

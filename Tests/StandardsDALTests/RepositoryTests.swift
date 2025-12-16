@@ -189,7 +189,8 @@ struct RepositoryTests {
 
             // Find by jurisdiction
             let jurisdictionCredentials = try await credentialRepo.findByJurisdiction(
-                jurisdictionId: jurisdictionID)
+                jurisdictionId: jurisdictionID
+            )
             #expect(jurisdictionCredentials.count == 1, "Should find one credential for jurisdiction")
         }
     }

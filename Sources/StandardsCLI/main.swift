@@ -3,27 +3,29 @@ import Foundation
 let arguments = CommandLine.arguments
 
 func printUsage() {
-    print("""
-    Usage: standards <command> [arguments]
+    print(
+        """
+        Usage: standards <command> [arguments]
 
-    Commands:
-      lint <directory> [--fix]    Validate Markdown files have lines ≤120 characters
-                                  Use --fix to automatically correct violations
-      voice <directory>           Check Markdown files for active voice and tone compliance
-      setup                       Create ~/Standards structure and fetch projects
-      sync                        Sync all projects (git pull existing repos)
-      zip [directory]             Convert Markdown files to .docx, zip them, and open Mail.app
-                                  Excludes README.md files
+        Commands:
+          lint <directory> [--fix]    Validate Markdown files have lines ≤120 characters
+                                      Use --fix to automatically correct violations
+          voice <directory>           Check Markdown files for active voice and tone compliance
+          setup                       Create ~/Standards structure and fetch projects
+          sync                        Sync all projects (git pull existing repos)
+          zip [directory]             Convert Markdown files to .docx, zip them, and open Mail.app
+                                      Excludes README.md files
 
-    Examples:
-      standards lint .
-      standards lint . --fix
-      standards voice ShookFamily/Estate
-      standards setup
-      standards sync
-      standards zip
-      standards zip SagebrushHoldingCompany
-    """)
+        Examples:
+          standards lint .
+          standards lint . --fix
+          standards voice ShookFamily/Estate
+          standards setup
+          standards sync
+          standards zip
+          standards zip SagebrushHoldingCompany
+        """
+    )
 }
 
 Task {

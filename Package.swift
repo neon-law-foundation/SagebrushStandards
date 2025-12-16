@@ -49,6 +49,6 @@ let package = Package(
             dependencies: [
                 "StandardsCLI"
             ]
-        )
+        ),
     ]
 )

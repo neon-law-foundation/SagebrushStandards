@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import StandardsCLI
 
 @Suite("Setup Command Tests")
@@ -18,14 +19,22 @@ struct SetupCommandTests {
     func createMockTemplates(in directory: URL) throws {
         // Create mock CLAUDE.md template
         let claudeURL = directory.appendingPathComponent("CLAUDE.md")
-        try "# Mock CLAUDE.md\n\nTest content for CLAUDE template.".write(to: claudeURL, atomically: true, encoding: .utf8)
+        try "# Mock CLAUDE.md\n\nTest content for CLAUDE template.".write(
+            to: claudeURL,
+            atomically: true,
+            encoding: .utf8
+        )
 
         // Create mock agents directory and markdown-formatter.md
         let agentsURL = directory.appendingPathComponent("agents")
         try FileManager.default.createDirectory(at: agentsURL, withIntermediateDirectories: true)
 
         let formatterURL = agentsURL.appendingPathComponent("markdown-formatter.md")
-        try "# Mock Markdown Formatter\n\nTest content for formatter agent.".write(to: formatterURL, atomically: true, encoding: .utf8)
+        try "# Mock Markdown Formatter\n\nTest content for formatter agent.".write(
+            to: formatterURL,
+            atomically: true,
+            encoding: .utf8
+        )
     }
 
     @Test("Setup command creates Standards directory structure")
@@ -62,7 +71,8 @@ struct SetupCommandTests {
         #expect(FileManager.default.fileExists(atPath: claudeURL.path))
 
         // Verify .claude/agents directory was created
-        let agentsURL = standardsURL
+        let agentsURL =
+            standardsURL
             .appendingPathComponent(".claude")
             .appendingPathComponent("agents")
         #expect(FileManager.default.fileExists(atPath: agentsURL.path))

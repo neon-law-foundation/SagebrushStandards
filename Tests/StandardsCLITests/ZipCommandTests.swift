@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import StandardsCLI
 
 @Suite("Zip Command")
@@ -59,10 +60,12 @@ struct ZipCommandTests {
         let readme = testDir.appendingPathComponent("README.md")
         try "# README".write(to: readme, atomically: true, encoding: .utf8)
 
-        guard let enumerator = FileManager.default.enumerator(
-            at: testDir,
-            includingPropertiesForKeys: [.isRegularFileKey]
-        ) else {
+        guard
+            let enumerator = FileManager.default.enumerator(
+                at: testDir,
+                includingPropertiesForKeys: [.isRegularFileKey]
+            )
+        else {
             throw NSError(domain: "Test", code: 1, userInfo: nil)
         }
 
@@ -93,11 +96,13 @@ struct ZipCommandTests {
         try "# Nested".write(to: nestedFile, atomically: true, encoding: .utf8)
         try "# Nested README".write(to: nestedReadme, atomically: true, encoding: .utf8)
 
-        guard let enumerator = FileManager.default.enumerator(
-            at: testDir,
-            includingPropertiesForKeys: [.isRegularFileKey],
-            options: [.skipsHiddenFiles]
-        ) else {
+        guard
+            let enumerator = FileManager.default.enumerator(
+                at: testDir,
+                includingPropertiesForKeys: [.isRegularFileKey],
+                options: [.skipsHiddenFiles]
+            )
+        else {
             throw NSError(domain: "Test", code: 1, userInfo: nil)
         }
 
@@ -106,7 +111,8 @@ struct ZipCommandTests {
         for case let fileURL as URL in enumerator {
             let resourceKeys = Set<URLResourceKey>([.isRegularFileKey])
             guard let resourceValues = try? fileURL.resourceValues(forKeys: resourceKeys),
-                  resourceValues.isRegularFile == true else {
+                resourceValues.isRegularFile == true
+            else {
                 continue
             }
 
@@ -159,11 +165,13 @@ struct ZipCommandTests {
         let readme = testDir.appendingPathComponent("README.md")
         try "# README".write(to: readme, atomically: true, encoding: .utf8)
 
-        guard let enumerator = FileManager.default.enumerator(
-            at: testDir,
-            includingPropertiesForKeys: [.isRegularFileKey],
-            options: [.skipsHiddenFiles]
-        ) else {
+        guard
+            let enumerator = FileManager.default.enumerator(
+                at: testDir,
+                includingPropertiesForKeys: [.isRegularFileKey],
+                options: [.skipsHiddenFiles]
+            )
+        else {
             throw NSError(domain: "Test", code: 1, userInfo: nil)
         }
 
@@ -172,7 +180,8 @@ struct ZipCommandTests {
         for case let fileURL as URL in enumerator {
             let resourceKeys = Set<URLResourceKey>([.isRegularFileKey])
             guard let resourceValues = try? fileURL.resourceValues(forKeys: resourceKeys),
-                  resourceValues.isRegularFile == true else {
+                resourceValues.isRegularFile == true
+            else {
                 continue
             }
 

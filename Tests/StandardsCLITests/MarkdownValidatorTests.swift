@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import StandardsCLI
 
 @Suite("Markdown Validator")
@@ -24,11 +25,11 @@ struct MarkdownValidatorTests {
 
         let fileURL = testFixturesURL.appendingPathComponent("valid.md")
         let content = """
-        # Short Title
+            # Short Title
 
-        This is a line with less than 120 characters.
-        Another short line.
-        """
+            This is a line with less than 120 characters.
+            Another short line.
+            """
         try content.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let violations = try validator.validateFile(at: fileURL)
@@ -44,10 +45,10 @@ struct MarkdownValidatorTests {
         // Create a line with exactly 120 characters
         let line120 = String(repeating: "a", count: 120)
         let content = """
-        # Title
+            # Title
 
-        \(line120)
-        """
+            \(line120)
+            """
         try content.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let violations = try validator.validateFile(at: fileURL)
@@ -63,10 +64,10 @@ struct MarkdownValidatorTests {
         // Create a line with 121 characters
         let line121 = String(repeating: "a", count: 121)
         let content = """
-        # Title
+            # Title
 
-        \(line121)
-        """
+            \(line121)
+            """
         try content.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let violations = try validator.validateFile(at: fileURL)
@@ -85,13 +86,13 @@ struct MarkdownValidatorTests {
         let line150 = String(repeating: "x", count: 150)
         let line130 = String(repeating: "y", count: 130)
         let content = """
-        # Title
+            # Title
 
-        \(line150)
-        Short line here.
-        \(line130)
-        Another short line.
-        """
+            \(line150)
+            Short line here.
+            \(line130)
+            Another short line.
+            """
         try content.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let violations = try validator.validateFile(at: fileURL)

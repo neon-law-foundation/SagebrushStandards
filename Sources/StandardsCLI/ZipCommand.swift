@@ -15,7 +15,8 @@ struct ZipCommand: Command {
         // Validate directory exists
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
-              isDirectory.boolValue else {
+            isDirectory.boolValue
+        else {
             print("Error: '\(directoryPath)' is not a valid directory")
             throw CommandError.invalidDirectory(directoryPath)
         }
@@ -79,11 +80,13 @@ struct ZipCommand: Command {
         let fileManager = FileManager.default
         let resourceKeys: [URLResourceKey] = [.isRegularFileKey]
 
-        guard let enumerator = fileManager.enumerator(
-            at: directory,
-            includingPropertiesForKeys: resourceKeys,
-            options: [.skipsHiddenFiles]
-        ) else {
+        guard
+            let enumerator = fileManager.enumerator(
+                at: directory,
+                includingPropertiesForKeys: resourceKeys,
+                options: [.skipsHiddenFiles]
+            )
+        else {
             throw CommandError.invalidDirectory(directory.path)
         }
 
@@ -91,13 +94,13 @@ struct ZipCommand: Command {
 
         for case let fileURL as URL in enumerator {
             guard let resourceValues = try? fileURL.resourceValues(forKeys: Set(resourceKeys)),
-                  resourceValues.isRegularFile == true else {
+                resourceValues.isRegularFile == true
+            else {
                 continue
             }
 
             // Include .md files but exclude README.md
-            if fileURL.pathExtension.lowercased() == "md" &&
-               fileURL.lastPathComponent != "README.md" {
+            if fileURL.pathExtension.lowercased() == "md" && fileURL.lastPathComponent != "README.md" {
                 markdownFiles.append(fileURL)
             }
         }
@@ -114,7 +117,7 @@ struct ZipCommand: Command {
         let pandocPaths = [
             "/opt/homebrew/bin/pandoc",
             "/usr/local/bin/pandoc",
-            "/usr/bin/pandoc"
+            "/usr/bin/pandoc",
         ]
 
         guard let pandocPath = pandocPaths.first(where: { FileManager.default.fileExists(atPath: $0) }) else {
@@ -127,7 +130,7 @@ struct ZipCommand: Command {
             markdownFile.path,
             "-o", outputFile.path,
             "--from=markdown",
-            "--to=docx"
+            "--to=docx",
         ]
 
         let pipe = Pipe()
@@ -176,14 +179,14 @@ struct ZipCommand: Command {
     private func openMail(withAttachment attachment: URL, subject: String) async throws {
         // Use AppleScript to create a new email with subject and attachment
         let appleScript = """
-        tell application "Mail"
-            set newMessage to make new outgoing message with properties {subject:"\(subject)", visible:true}
-            tell newMessage
-                make new attachment with properties {file name:"\(attachment.path)"} at after the last paragraph
+            tell application "Mail"
+                set newMessage to make new outgoing message with properties {subject:"\(subject)", visible:true}
+                tell newMessage
+                    make new attachment with properties {file name:"\(attachment.path)"} at after the last paragraph
+                end tell
+                activate
             end tell
-            activate
-        end tell
-        """
+            """
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")

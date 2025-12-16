@@ -1,5 +1,6 @@
 import Foundation
 import Testing
+
 @testable import StandardsCLI
 
 @Suite("Sync Command Tests")
@@ -76,6 +77,6 @@ struct MockSagebrushAPIClient: SagebrushAPIClientProtocol {
     let projects: [Project]
 
     func fetchProjects() async throws -> [Project] {
-        return projects
+        projects
     }
 }

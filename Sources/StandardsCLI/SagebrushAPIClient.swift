@@ -22,7 +22,7 @@ public struct SagebrushAPIClient: SagebrushAPIClientProtocol {
     public func fetchProjects() async throws -> [Project] {
         // TODO: Replace mock with actual API call when endpoint is available
         // For now, return empty array as requested
-        return []
+        []
 
         /* Future implementation:
         let url = URL(string: "\(baseURL)/api/projects")!

@@ -20,7 +20,8 @@ struct SyncCommand: Command {
         // Ensure ~/Standards directory exists
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: standardsURL.path, isDirectory: &isDirectory),
-              isDirectory.boolValue else {
+            isDirectory.boolValue
+        else {
             throw CommandError.setupFailed("~/Standards directory does not exist. Run 'standards setup' first.")
         }
 

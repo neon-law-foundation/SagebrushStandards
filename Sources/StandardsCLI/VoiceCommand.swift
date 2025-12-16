@@ -15,7 +15,8 @@ struct VoiceCommand: Command {
         // Validate directory exists
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
-              isDirectory.boolValue else {
+            isDirectory.boolValue
+        else {
             print("Error: '\(directoryPath)' is not a valid directory")
             throw CommandError.invalidDirectory(directoryPath)
         }
@@ -44,11 +45,13 @@ struct VoiceCommand: Command {
 
     func findMarkdownFiles(in directory: URL) throws -> [URL] {
         let fileManager = FileManager.default
-        guard let enumerator = fileManager.enumerator(
-            at: directory,
-            includingPropertiesForKeys: [.isRegularFileKey],
-            options: [.skipsHiddenFiles]
-        ) else {
+        guard
+            let enumerator = fileManager.enumerator(
+                at: directory,
+                includingPropertiesForKeys: [.isRegularFileKey],
+                options: [.skipsHiddenFiles]
+            )
+        else {
             return []
         }
 
@@ -69,22 +72,22 @@ struct VoiceCommand: Command {
 
     private func runClaudeVoiceCheck(on file: URL) async throws {
         let prompt = """
-        Review the file at \(file.path) according to the writing style and tone requirements in \
-        /Users/nick/Code/NLF/Standards/CLAUDE.md.
+            Review the file at \(file.path) according to the writing style and tone requirements in \
+            /Users/nick/Code/NLF/Standards/CLAUDE.md.
 
-        Specifically check for:
-        1. Active voice (avoid passive constructions)
-        2. No pronouns - reference people by their role (e.g., "executor", "stockholder", "secretary") instead of \
-        "he/she/they"
-        3. Clear, precise legal language
-        4. Proper term definitions before use
-        5. Logical structure with appropriate headings
+            Specifically check for:
+            1. Active voice (avoid passive constructions)
+            2. No pronouns - reference people by their role (e.g., "executor", "stockholder", "secretary") instead of \
+            "he/she/they"
+            3. Clear, precise legal language
+            4. Proper term definitions before use
+            5. Logical structure with appropriate headings
 
-        If you find any issues, edit the file to fix them. Focus on voice and tone improvements only - do not change \
-        the legal substance or meaning of the content.
+            If you find any issues, edit the file to fix them. Focus on voice and tone improvements only - do not change \
+            the legal substance or meaning of the content.
 
-        Ensure all edits maintain compliance with the Standards specification (all lines ≤120 characters).
-        """
+            Ensure all edits maintain compliance with the Standards specification (all lines ≤120 characters).
+            """
 
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/opt/homebrew/bin/claude")

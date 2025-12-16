@@ -11,11 +11,13 @@ public struct MarkdownValidator {
         let fileManager = FileManager.default
         var violations: [FileViolation] = []
 
-        guard let enumerator = fileManager.enumerator(
-            at: directory,
-            includingPropertiesForKeys: [.isRegularFileKey],
-            options: [.skipsHiddenFiles]
-        ) else {
+        guard
+            let enumerator = fileManager.enumerator(
+                at: directory,
+                includingPropertiesForKeys: [.isRegularFileKey],
+                options: [.skipsHiddenFiles]
+            )
+        else {
             throw ValidationError.directoryNotAccessible(directory)
         }
 
@@ -47,11 +49,13 @@ public struct MarkdownValidator {
             let length = line.count
 
             if length > maxLineLength {
-                violations.append(LineViolation(
-                    lineNumber: lineNumber,
-                    length: length,
-                    maxLength: maxLineLength
-                ))
+                violations.append(
+                    LineViolation(
+                        lineNumber: lineNumber,
+                        length: length,
+                        maxLength: maxLineLength
+                    )
+                )
             }
         }
 

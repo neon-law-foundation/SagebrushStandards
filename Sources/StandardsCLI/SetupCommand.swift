@@ -12,7 +12,8 @@ struct SetupCommand: Command {
     ) {
         self.apiClient = apiClient
         self.homeDirectory = homeDirectory ?? FileManager.default.homeDirectoryForCurrentUser
-        self.templateDirectory = templateDirectory ?? URL(fileURLWithPath: "/Users/nick/Code/NLF/Standards/ClaudeTemplates")
+        self.templateDirectory =
+            templateDirectory ?? URL(fileURLWithPath: "/Users/nick/Code/NLF/Standards/ClaudeTemplates")
     }
 
     func run() async throws {
@@ -50,7 +51,7 @@ struct SetupCommand: Command {
         var isDirectory: ObjCBool = false
         if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
             if isDirectory.boolValue {
-                return // Directory already exists
+                return  // Directory already exists
             } else {
                 throw CommandError.setupFailed("\(url.path) exists but is not a directory")
             }
@@ -90,7 +91,8 @@ struct SetupCommand: Command {
 
     private func setupClaudeAgents(in standardsURL: URL) async throws {
         // Create ~/Standards/.claude/agents directory
-        let claudeAgentsURL = standardsURL
+        let claudeAgentsURL =
+            standardsURL
             .appendingPathComponent(".claude")
             .appendingPathComponent("agents")
         try createDirectoryIfNeeded(at: claudeAgentsURL)
@@ -105,7 +107,8 @@ struct SetupCommand: Command {
         }
 
         // Find source agent
-        let agentTemplateURL = templateDirectory
+        let agentTemplateURL =
+            templateDirectory
             .appendingPathComponent("agents")
             .appendingPathComponent("markdown-formatter.md")
 
@@ -124,7 +127,8 @@ struct SetupCommand: Command {
 
     private func setupClaudeCommands(in standardsURL: URL) async throws {
         // Create ~/Standards/.claude/commands directory
-        let claudeCommandsURL = standardsURL
+        let claudeCommandsURL =
+            standardsURL
             .appendingPathComponent(".claude")
             .appendingPathComponent("commands")
         try createDirectoryIfNeeded(at: claudeCommandsURL)
@@ -139,7 +143,8 @@ struct SetupCommand: Command {
         }
 
         // Find source command
-        let commandTemplateURL = templateDirectory
+        let commandTemplateURL =
+            templateDirectory
             .appendingPathComponent("commands")
             .appendingPathComponent("format-markdown.md")
 

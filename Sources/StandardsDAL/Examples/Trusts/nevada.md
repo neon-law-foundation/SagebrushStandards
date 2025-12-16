@@ -21,5 +21,6 @@ description: >
 
 ## Community Property
 
-Nevada is a community property state but does not recognize a community property trust. Should the laws change, we will
+Nevada is a community property state but does not recognize a community property
+trust. Should the laws change, we will
 update this document to reflect the new laws.

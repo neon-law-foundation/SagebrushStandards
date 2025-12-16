@@ -71,7 +71,11 @@ enum TestUtilities {
     }
 
     /// Create a test credential
-    static func createTestCredential(personID: Int32, jurisdictionID: Int32, licenseNumber: String? = nil)
+    static func createTestCredential(
+        personID: Int32,
+        jurisdictionID: Int32,
+        licenseNumber: String? = nil
+    )
         -> Credential
     {
         let credential = Credential()

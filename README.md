@@ -1,6 +1,7 @@
 # Sagebrush Standards
 
-Questionnaires, Workflows, and Templates together to create computable contracts.
+Questionnaires, Workflows, and Templates together to create computable
+contracts.
 
 ## Installation
 
@@ -37,7 +38,8 @@ standards lint . --fix
 
 ### `standards voice <directory>`
 
-Checks Markdown files (except README.md) for active voice and tone compliance according to the writing guidelines in
+Checks Markdown files (except README.md) for active voice and tone compliance
+according to the writing guidelines in
 CLAUDE.md.
 
 ```bash
@@ -52,7 +54,8 @@ standards voice ShookFamily/Estate
 
 ### `standards setup`
 
-Creates the `~/Standards` directory structure and fetches all projects from the Sagebrush API.
+Creates the `~/Standards` directory structure and fetches all projects from the
+Sagebrush API.
 
 ```bash
 standards setup
@@ -60,7 +63,8 @@ standards setup
 
 ### `standards sync`
 
-Syncs all projects in `~/Standards` by running `git pull` on existing repositories.
+Syncs all projects in `~/Standards` by running `git pull` on existing
+repositories.
 
 ```bash
 standards sync

@@ -12,16 +12,19 @@ Data Access Layer for Standards application with Fluent ORM support.
 
 ## Database Configuration
 
-The database is automatically configured based on the `ENV` environment variable, following the same pattern as NLF/Web:
+The database is automatically configured based on the `ENV` environment
+variable, following the same pattern as NLF/Web:
 
 ### Environment Variables
 
 #### ENV (Required for environment selection)
+
 - `ENV=production` → Uses PostgreSQL
 - `ENV=testing` → Uses SQLite (in-memory)
 - `ENV=development` or unset → Uses SQLite (file-based)
 
 #### PostgreSQL Configuration (when ENV=production)
+
 - `DATABASE_HOST` - PostgreSQL host (default: `localhost`)
 - `DATABASE_PORT` - PostgreSQL port (default: `5432`)
 - `DATABASE_USERNAME` - PostgreSQL username (default: `postgres`)
@@ -29,6 +32,7 @@ The database is automatically configured based on the `ENV` environment variable
 - `DATABASE_NAME` - PostgreSQL database name (default: `standards`)
 
 #### SQLite Configuration (when ENV=development)
+
 - `DATABASE_PATH` - SQLite file path (default: `db/standards.sqlite`)
 
 ## Usage
@@ -52,7 +56,7 @@ person.email = "john@example.com"
 try await personRepo.create(model: person)
 ```
 
-### Testing
+### Testing Usage
 
 ```swift
 import StandardsDAL
@@ -100,7 +104,8 @@ All models use `Int32` primary keys and include timestamps:
 
 ## Repositories
 
-Each model has a corresponding repository with CRUD operations plus domain-specific queries:
+Each model has a corresponding repository with CRUD operations plus
+domain-specific queries:
 
 ```swift
 // Example: PersonRepository
@@ -127,13 +132,18 @@ let person = try await repo.findByEmail("john@example.com")
 - **ShareClassRepository**: `findByEntity(entityId:)`
 - **BlobRepository**: `findByReference(referencedBy:referencedById:)`
 - **ProjectRepository**: `findByCodename(_:)`
-- **CredentialRepository**: `findByPerson(personId:)`, `findByJurisdiction(jurisdictionId:)`
-- **RelationshipLogRepository**: `findByProject(projectId:)`, `findByCredential(credentialId:)`
-- **DisclosureRepository**: `findActive()`, `findByProject(projectId:)`, `findByCredential(credentialId:)`
+- **CredentialRepository**: `findByPerson(personId:)`,
+  `findByJurisdiction(jurisdictionId:)`
+- **RelationshipLogRepository**: `findByProject(projectId:)`,
+  `findByCredential(credentialId:)`
+- **DisclosureRepository**: `findActive()`, `findByProject(projectId:)`,
+  `findByCredential(credentialId:)`
 - **QuestionRepository**: `findByCode(_:)`, `findByType(_:)`
-- **AddressRepository**: `findByPerson(personId:)`, `findByEntity(entityId:)`, `findVerified()`
+- **AddressRepository**: `findByPerson(personId:)`, `findByEntity(entityId:)`,
+  `findVerified()`
 - **MailboxRepository**: `findByAddress(addressId:)`, `findActive()`
-- **PersonEntityRoleRepository**: `findByPerson(personId:)`, `findByEntity(entityId:)`, `findByRole(_:)`
+- **PersonEntityRoleRepository**: `findByPerson(personId:)`,
+  `findByEntity(entityId:)`, `findByRole(_:)`
 
 ## Testing
 
@@ -148,6 +158,7 @@ All tests use in-memory SQLite and are fully isolated.
 ## Migration Order
 
 Migrations run in dependency order:
+
 1. People
 2. Users (depends on People)
 3. Jurisdictions
