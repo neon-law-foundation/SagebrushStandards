@@ -22,7 +22,13 @@ struct CommandTests {
         defer { cleanupTestDirectory(testDir) }
 
         let fileURL = testDir.appendingPathComponent("test.md")
-        try "# Short content".write(to: fileURL, atomically: true, encoding: .utf8)
+        try """
+        ---
+        title: Test Document
+        ---
+
+        # Short content
+        """.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let command = LintCommand(directoryPath: testDir.path, fix: false)
         try await command.run()
@@ -83,7 +89,15 @@ struct CommandTests {
 
         // Create a regular .md file with valid content
         let docURL = testDir.appendingPathComponent("doc.md")
-        try "# Documentation\n\nShort content".write(to: docURL, atomically: true, encoding: .utf8)
+        try """
+        ---
+        title: Documentation
+        ---
+
+        # Documentation
+
+        Short content
+        """.write(to: docURL, atomically: true, encoding: .utf8)
 
         // Lint should pass because README.md is excluded
         let command = LintCommand(directoryPath: testDir.path, fix: false)

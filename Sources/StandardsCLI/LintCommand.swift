@@ -22,85 +22,160 @@ struct LintCommand: Command {
             throw CommandError.invalidDirectory(directoryPath)
         }
 
-        // Run validation
-        let validator = MarkdownValidator()
-        let result = try validator.validate(directory: url)
+        // Run validations
+        let markdownValidator = MarkdownValidator()
+        let frontmatterValidator = FrontmatterValidator()
+
+        let markdownResult = try markdownValidator.validate(directory: url)
+        let frontmatterResult = try frontmatterValidator.validate(directory: url)
 
         // Print results
-        if result.isValid {
+        let allValid = markdownResult.isValid && frontmatterResult.isValid
+
+        if allValid {
             print("✓ All Markdown files have lines of 120 characters or less")
+            print("✓ All Markdown files have frontmatter with title")
         } else {
-            print("✗ Found line length violations:\n")
+            // Print line length violations
+            if !markdownResult.isValid {
+                print("✗ Found line length violations:\n")
 
-            for fileViolation in result.violations {
-                let relativePath =
-                    url.path.isEmpty
-                    ? fileViolation.file.path
-                    : fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
-                print("\(relativePath):")
-
-                for violation in fileViolation.violations {
-                    print(
-                        "  Line \(violation.lineNumber): \(violation.length) characters "
-                            + "(exceeds \(violation.maxLength))"
-                    )
-                }
-                print("")
-            }
-
-            if fix {
-                print("\n🔧 Auto-fixing violations...\n")
-
-                for fileViolation in result.violations {
+                for fileViolation in markdownResult.violations {
                     let relativePath =
                         url.path.isEmpty
                         ? fileViolation.file.path
                         : fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
-                    print("Fixing: \(relativePath)")
+                    print("\(relativePath):")
 
-                    try await fixFile(fileViolation.file)
+                    for violation in fileViolation.violations {
+                        print(
+                            "  Line \(violation.lineNumber): \(violation.length) characters "
+                                + "(exceeds \(violation.maxLength))"
+                        )
+                    }
+                    print("")
                 }
+            }
 
-                print("\n✓ Auto-fix complete. Running validation again...\n")
+            // Print frontmatter violations
+            if !frontmatterResult.isValid {
+                print("✗ Found frontmatter violations:\n")
 
-                // Re-run validation
-                let newResult = try validator.validate(directory: url)
-                if newResult.isValid {
-                    print("✓ All Markdown files now have lines of 120 characters or less")
-                } else {
-                    print("⚠️  Some violations could not be fixed automatically:")
-                    for fileViolation in newResult.violations {
+                for fileViolation in frontmatterResult.violations {
+                    let relativePath =
+                        url.path.isEmpty
+                        ? fileViolation.file.path
+                        : fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
+                    print("\(relativePath):")
+
+                    for violation in fileViolation.violations {
+                        print("  \(violation.type.message)")
+                    }
+                    print("")
+                }
+            }
+
+            if fix {
+                // Only auto-fix line length violations
+                if !markdownResult.isValid {
+                    print("\n🔧 Auto-fixing line length violations...\n")
+
+                    for fileViolation in markdownResult.violations {
                         let relativePath =
                             url.path.isEmpty
                             ? fileViolation.file.path
                             : fileViolation.file.path.replacingOccurrences(of: url.path + "/", with: "")
-                        print("  \(relativePath): \(fileViolation.violations.count) violations remaining")
+                        print("Fixing: \(relativePath)")
+
+                        try await fixFile(fileViolation.file)
                     }
+
+                    print("\n✓ Auto-fix complete. Running validation again...\n")
+
+                    // Re-run validation
+                    let newMarkdownResult = try markdownValidator.validate(directory: url)
+                    let newFrontmatterResult = try frontmatterValidator.validate(directory: url)
+
+                    if newMarkdownResult.isValid && newFrontmatterResult.isValid {
+                        print("✓ All Markdown files now have lines of 120 characters or less")
+                        print("✓ All Markdown files have frontmatter with title")
+                    } else {
+                        if !newMarkdownResult.isValid {
+                            print("⚠️  Some line length violations could not be fixed automatically:")
+                            for fileViolation in newMarkdownResult.violations {
+                                let relativePath =
+                                    url.path.isEmpty
+                                    ? fileViolation.file.path
+                                    : fileViolation.file.path.replacingOccurrences(
+                                        of: url.path + "/",
+                                        with: ""
+                                    )
+                                print(
+                                    "  \(relativePath): \(fileViolation.violations.count) violations remaining"
+                                )
+                            }
+                        }
+                        if !newFrontmatterResult.isValid {
+                            print("\n⚠️  Frontmatter violations cannot be auto-fixed:")
+                            for fileViolation in newFrontmatterResult.violations {
+                                let relativePath =
+                                    url.path.isEmpty
+                                    ? fileViolation.file.path
+                                    : fileViolation.file.path.replacingOccurrences(
+                                        of: url.path + "/",
+                                        with: ""
+                                    )
+                                print("  \(relativePath): must add frontmatter with title manually")
+                            }
+                        }
+                        throw CommandError.lintFailed
+                    }
+                } else if !frontmatterResult.isValid {
+                    print("\n⚠️  Frontmatter violations cannot be auto-fixed. Please add frontmatter manually.")
                     throw CommandError.lintFailed
                 }
             } else {
-                print(
-                    """
+                var instructions = "\n📝 Fix Instructions:\n"
 
-                    📝 Fix Instructions:
-                    All lines in Markdown files must be ≤120 characters. To fix these violations:
+                if !markdownResult.isValid {
+                    instructions += """
 
-                    1. Break long lines at natural boundaries (spaces, punctuation)
-                    2. Keep each line as close to 120 characters as possible without exceeding it
-                    3. Maintain readability and proper Markdown formatting
-                    4. For long URLs or code, consider using reference-style links
+                        Line Length Violations:
+                        All lines in Markdown files must be ≤120 characters. To fix these violations:
 
-                    Example fix for a 150-character line:
-                    Before: "This is an extremely long line that contains too many characters and needs to be broken up into
-                    multiple lines for better readability."
-                    After:  "This is an extremely long line that contains too many characters and needs to be broken up into
-                    multiple
-                    lines for better readability."
+                        1. Break long lines at natural boundaries (spaces, punctuation)
+                        2. Keep each line as close to 120 characters as possible without exceeding it
+                        3. Maintain readability and proper Markdown formatting
+                        4. For long URLs or code, consider using reference-style links
 
-                    Run 'standards lint . --fix' to automatically fix these violations, or fix them manually and run \
-                    'standards lint .' again to verify.
-                    """
-                )
+                        Run 'standards lint . --fix' to automatically fix line length violations.
+
+                        """
+                }
+
+                if !frontmatterResult.isValid {
+                    instructions += """
+
+                        Frontmatter Violations:
+                        All Markdown files must have YAML frontmatter with a title field. To fix these violations:
+
+                        1. Add frontmatter at the beginning of the file
+                        2. Include a 'title' field with a non-empty value
+
+                        Example:
+                        ---
+                        title: Document Title Here
+                        ---
+
+                        # Your content here
+
+                        Note: Frontmatter violations cannot be auto-fixed. Please add frontmatter manually.
+
+                        """
+                }
+
+                instructions += "Run 'standards lint .' again to verify after making changes."
+                print(instructions)
 
                 throw CommandError.lintFailed
             }

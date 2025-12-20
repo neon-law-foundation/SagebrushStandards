@@ -22,8 +22,7 @@ public struct MarkdownValidator {
         }
 
         for case let fileURL as URL in enumerator {
-            guard fileURL.pathExtension == "md" else { continue }
-            guard fileURL.lastPathComponent != "README.md" else { continue }
+            guard FileFilters.shouldValidate(fileURL) else { continue }
 
             let fileViolations = try validateFile(at: fileURL)
             if !fileViolations.isEmpty {
