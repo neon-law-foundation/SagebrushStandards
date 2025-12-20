@@ -6,7 +6,7 @@ public enum FileFilters {
     /// - Parameter url: The file URL to check
     /// - Returns: true if the file should be excluded, false otherwise
     public static func shouldExcludeFromValidation(_ url: URL) -> Bool {
-        url.lastPathComponent == "README.md"
+        url.lastPathComponent == "README.md" || url.lastPathComponent == "CLAUDE.md"
     }
 
     /// Determines if a file is a Markdown file that should be validated

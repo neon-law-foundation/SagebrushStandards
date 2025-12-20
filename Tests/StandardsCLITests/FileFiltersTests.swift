@@ -12,6 +12,13 @@ struct FileFiltersTests {
         #expect(!FileFilters.shouldValidate(readmeURL))
     }
 
+    @Test("CLAUDE.md files should be excluded from validation")
+    func claudeFilesExcluded() {
+        let claudeURL = URL(fileURLWithPath: "/some/path/CLAUDE.md")
+        #expect(FileFilters.shouldExcludeFromValidation(claudeURL))
+        #expect(!FileFilters.shouldValidate(claudeURL))
+    }
+
     @Test("Regular markdown files should not be excluded")
     func regularMarkdownFilesNotExcluded() {
         let regularURL = URL(fileURLWithPath: "/some/path/document.md")

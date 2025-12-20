@@ -104,6 +104,33 @@ struct CommandTests {
         try await command.run()
     }
 
+    @Test("Lint command excludes CLAUDE.md files")
+    func lintCommandExcludesClaudeFiles() async throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        // Create a CLAUDE.md with long lines (should be ignored)
+        let claudeURL = testDir.appendingPathComponent("CLAUDE.md")
+        let longLine = String(repeating: "a", count: 150)
+        try "# CLAUDE\n\n\(longLine)".write(to: claudeURL, atomically: true, encoding: .utf8)
+
+        // Create a regular .md file with valid content
+        let docURL = testDir.appendingPathComponent("doc.md")
+        try """
+        ---
+        title: Documentation
+        ---
+
+        # Documentation
+
+        Short content
+        """.write(to: docURL, atomically: true, encoding: .utf8)
+
+        // Lint should pass because CLAUDE.md is excluded
+        let command = LintCommand(directoryPath: testDir.path, fix: false)
+        try await command.run()
+    }
+
     @Test("Voice command excludes README.md files")
     func voiceCommandExcludesReadmeFiles() throws {
         let testDir = try createTestDirectory()
