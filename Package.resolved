@@ -1,5 +1,5 @@
 {
-  "originHash" : "83edfa55d3ccf5e418eb9fda9901b0c1f69a09ac19563f4585ab9fc3ba07ebc2",
+  "originHash" : "bee7353c42484fe0c2464c4fca4426914ea78ff48b3cf85470cc541cbab1f5dd",
   "pins" : [
     {
       "identity" : "async-http-client",
@@ -161,6 +161,15 @@
       "state" : {
         "revision" : "b601256eab081c0f92f059e12818ac1d4f178ff7",
         "version" : "1.3.0"
+      }
+    },
+    {
+      "identity" : "swift-aws-lambda-runtime",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swift-server/swift-aws-lambda-runtime.git",
+      "state" : {
+        "revision" : "5ecc24fa54e61756fe7a7a01f2451da1cffa916e",
+        "version" : "1.0.0-alpha.3"
       }
     },
     {
@@ -332,6 +341,15 @@
       "state" : {
         "revision" : "8666c92dbbb3c8eefc8008c9c8dcf50bfd302167",
         "version" : "2.16.1"
+      }
+    },
+    {
+      "identity" : "yams",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/jpsim/Yams.git",
+      "state" : {
+        "revision" : "3d6871d5b4a5cd519adf233fbb576e0a2af71c17",
+        "version" : "5.4.0"
       }
     }
   ],

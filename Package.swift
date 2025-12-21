@@ -14,6 +14,8 @@ let package = Package(
         .package(url: "https://github.com/vapor/fluent-sqlite-driver.git", from: "4.0.0"),
         .package(url: "https://github.com/vapor/vapor.git", from: "4.115.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.6.3"),
+        .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.0"),
+        .package(url: "https://github.com/swift-server/swift-aws-lambda-runtime.git", from: "1.0.0-alpha"),
     ],
     targets: [
         .target(
@@ -24,17 +26,27 @@ let package = Package(
                 .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
                 .product(name: "Vapor", package: "vapor"),
                 .product(name: "Logging", package: "swift-log"),
+                .product(name: "Yams", package: "Yams"),
             ],
             exclude: [
                 "README.md"
             ],
             resources: [
-                .copy("Examples")
+                .copy("Examples"),
+                .copy("Seeds")
             ]
         ),
         .executableTarget(
             name: "StandardsCLI",
             dependencies: []
+        ),
+        .executableTarget(
+            name: "MigrationRunner",
+            dependencies: [
+                "StandardsDAL",
+                .product(name: "AWSLambdaRuntime", package: "swift-aws-lambda-runtime"),
+                .product(name: "Logging", package: "swift-log"),
+            ]
         ),
         .testTarget(
             name: "StandardsDALTests",
