@@ -33,7 +33,7 @@ let package = Package(
             ],
             resources: [
                 .copy("Examples"),
-                .copy("Seeds")
+                .copy("Seeds"),
             ]
         ),
         .executableTarget(

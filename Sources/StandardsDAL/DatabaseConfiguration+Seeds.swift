@@ -34,7 +34,7 @@ extension StandardsDALConfiguration {
                 existing.name = name.isEmpty ? existing.name : name
                 existing.code = code.isEmpty ? existing.code : code
                 if let jurisdictionTypeString = record["jurisdiction_type"] as? String,
-                   let jurisdictionType = JurisdictionType(rawValue: jurisdictionTypeString)
+                    let jurisdictionType = JurisdictionType(rawValue: jurisdictionTypeString)
                 {
                     existing.jurisdictionType = jurisdictionType
                 }
@@ -47,7 +47,7 @@ extension StandardsDALConfiguration {
         jurisdiction.code = code
         jurisdiction.name = name
         if let jurisdictionTypeString = record["jurisdiction_type"] as? String,
-           let jurisdictionType = JurisdictionType(rawValue: jurisdictionTypeString)
+            let jurisdictionType = JurisdictionType(rawValue: jurisdictionTypeString)
         {
             jurisdiction.jurisdictionType = jurisdictionType
         } else {
@@ -67,7 +67,7 @@ extension StandardsDALConfiguration {
 
         let jurisdictionId: Int32?
         if let jurisdictionDict = record["jurisdiction"] as? [String: Any],
-           let jurisdictionName = jurisdictionDict["name"] as? String
+            let jurisdictionName = jurisdictionDict["name"] as? String
         {
             let jurisdiction = try await Jurisdiction.query(on: database)
                 .filter(\.$name == jurisdictionName)
@@ -80,7 +80,7 @@ extension StandardsDALConfiguration {
         }
 
         if !lookupFields.isEmpty,
-           let jurisdictionId = jurisdictionId
+            let jurisdictionId = jurisdictionId
         {
             if let existing = try await EntityType.query(on: database)
                 .filter(\.$name == name)
@@ -114,7 +114,7 @@ extension StandardsDALConfiguration {
             {
                 existing.prompt = record["prompt"] as? String ?? existing.prompt
                 if let questionTypeString = record["question_type"] as? String,
-                   let questionType = QuestionType(rawValue: questionTypeString)
+                    let questionType = QuestionType(rawValue: questionTypeString)
                 {
                     existing.questionType = questionType
                 }
@@ -128,7 +128,7 @@ extension StandardsDALConfiguration {
         let question = Question()
         question.prompt = record["prompt"] as? String ?? ""
         if let questionTypeString = record["question_type"] as? String,
-           let questionType = QuestionType(rawValue: questionTypeString)
+            let questionType = QuestionType(rawValue: questionTypeString)
         {
             question.questionType = questionType
         } else {
@@ -173,7 +173,7 @@ extension StandardsDALConfiguration {
     ) async throws {
         let personId: Int32?
         if let personDict = record["person"] as? [String: Any],
-           let personEmail = personDict["email"] as? String
+            let personEmail = personDict["email"] as? String
         {
             let person = try await Person.query(on: database)
                 .filter(\.$email == personEmail)
@@ -193,7 +193,7 @@ extension StandardsDALConfiguration {
                 .first()
             {
                 if let roleString = record["role"] as? String,
-                   let role = UserRole(rawValue: roleString)
+                    let role = UserRole(rawValue: roleString)
                 {
                     existing.role = role
                 }
@@ -205,7 +205,7 @@ extension StandardsDALConfiguration {
         let user = User()
         user.$person.id = personId
         if let roleString = record["role"] as? String,
-           let role = UserRole(rawValue: roleString)
+            let role = UserRole(rawValue: roleString)
         {
             user.role = role
         } else {
@@ -225,10 +225,10 @@ extension StandardsDALConfiguration {
 
         let entityTypeId: Int32?
         if let entityTypeDict = record["entity_type"] as? [String: Any],
-           let entityTypeName = entityTypeDict["name"] as? String
+            let entityTypeName = entityTypeDict["name"] as? String
         {
             if let jurisdictionDict = entityTypeDict["jurisdiction"] as? [String: Any],
-               let jurisdictionName = jurisdictionDict["name"] as? String
+                let jurisdictionName = jurisdictionDict["name"] as? String
             {
                 let jurisdiction = try await Jurisdiction.query(on: database)
                     .filter(\.$name == jurisdictionName)
@@ -287,7 +287,7 @@ extension StandardsDALConfiguration {
 
         let personId: Int32?
         if let personDict = record["person"] as? [String: Any],
-           let personEmail = personDict["email"] as? String
+            let personEmail = personDict["email"] as? String
         {
             let person = try await Person.query(on: database)
                 .filter(\.$email == personEmail)
@@ -301,7 +301,7 @@ extension StandardsDALConfiguration {
 
         let jurisdictionId: Int32?
         if let jurisdictionDict = record["jurisdiction"] as? [String: Any],
-           let jurisdictionName = jurisdictionDict["name"] as? String
+            let jurisdictionName = jurisdictionDict["name"] as? String
         {
             let jurisdiction = try await Jurisdiction.query(on: database)
                 .filter(\.$name == jurisdictionName)
@@ -358,7 +358,7 @@ extension StandardsDALConfiguration {
             }
 
             if lookupFields.contains("entity_id"),
-               let entityId = try await resolveForeignKey("entity", from: record, database: database)
+                let entityId = try await resolveForeignKey("entity", from: record, database: database)
             {
                 query = query.filter(\.$entity.$id == entityId)
             }
@@ -404,7 +404,7 @@ extension StandardsDALConfiguration {
             }
 
             if lookupFields.contains("address_id"),
-               let addressId = try await resolveForeignKey("address", from: record, database: database)
+                let addressId = try await resolveForeignKey("address", from: record, database: database)
             {
                 query = query.filter(\.$address.$id == addressId)
             }
@@ -439,7 +439,7 @@ extension StandardsDALConfiguration {
     ) async throws {
         let personId: Int32?
         if let personDict = record["person"] as? [String: Any],
-           let personEmail = personDict["email"] as? String
+            let personEmail = personDict["email"] as? String
         {
             let person = try await Person.query(on: database)
                 .filter(\.$email == personEmail)
@@ -453,7 +453,7 @@ extension StandardsDALConfiguration {
 
         let entityId: Int32?
         if let entityDict = record["entity"] as? [String: Any],
-           let entityName = entityDict["name"] as? String
+            let entityName = entityDict["name"] as? String
         {
             let entity = try await Entity.query(on: database)
                 .filter(\.$name == entityName)
@@ -468,8 +468,8 @@ extension StandardsDALConfiguration {
         let role = record["role"] as? String ?? "admin"
 
         if !lookupFields.isEmpty,
-           let personId = personId,
-           let entityId = entityId
+            let personId = personId,
+            let entityId = entityId
         {
             let existing = try await PersonEntityRole.query(on: database)
                 .filter(\.$person.$id == personId)
@@ -556,11 +556,11 @@ extension StandardsDALConfiguration {
         entity.name = name
 
         if let entityTypeData = entityData["entity_type"] as? [String: Any],
-           let entityTypeName = entityTypeData["name"] as? String
+            let entityTypeName = entityTypeData["name"] as? String
         {
 
             if let jurisdictionData = entityTypeData["jurisdiction"] as? [String: Any],
-               let jurisdictionName = jurisdictionData["name"] as? String
+                let jurisdictionName = jurisdictionData["name"] as? String
             {
 
                 let jurisdiction = try await Jurisdiction.query(on: database)

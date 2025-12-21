@@ -24,11 +24,10 @@ public struct SagebrushAPIClient: SagebrushAPIClientProtocol {
         // For now, return empty array as requested
         []
 
-        /* Future implementation:
-        let url = URL(string: "\(baseURL)/api/projects")!
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let projects = try JSONDecoder().decode([Project].self, from: data)
-        return projects
-        */
+        // Future implementation:
+        // let url = URL(string: "\(baseURL)/api/projects")!
+        // let (data, _) = try await URLSession.shared.data(from: url)
+        // let projects = try JSONDecoder().decode([Project].self, from: data)
+        // return projects
     }
 }
