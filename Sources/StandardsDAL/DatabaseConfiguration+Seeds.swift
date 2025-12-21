@@ -11,7 +11,7 @@ extension StandardsDALConfiguration {
 
     // MARK: - Jurisdiction
 
-    static func insertJurisdiction(
+    public static func insertJurisdiction(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -58,7 +58,7 @@ extension StandardsDALConfiguration {
 
     // MARK: - EntityType
 
-    static func insertEntityType(
+    public static func insertEntityType(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -102,7 +102,7 @@ extension StandardsDALConfiguration {
 
     // MARK: - Question
 
-    static func insertQuestion(
+    public static func insertQuestion(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -142,7 +142,7 @@ extension StandardsDALConfiguration {
 
     // MARK: - Person
 
-    static func insertPerson(
+    public static func insertPerson(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -166,7 +166,7 @@ extension StandardsDALConfiguration {
 
     // MARK: - User
 
-    static func insertUser(
+    public static func insertUser(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -216,7 +216,7 @@ extension StandardsDALConfiguration {
 
     // MARK: - Entity
 
-    static func insertEntity(
+    public static func insertEntity(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -278,7 +278,7 @@ extension StandardsDALConfiguration {
 
     // MARK: - Credential
 
-    static func insertCredential(
+    public static func insertCredential(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -342,7 +342,7 @@ extension StandardsDALConfiguration {
 
     // MARK: - Address
 
-    static func insertAddress(
+    public static func insertAddress(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -367,6 +367,9 @@ extension StandardsDALConfiguration {
                 if let entityId = try await resolveForeignKey("entity", from: record, database: database) {
                     existing.$entity.id = entityId
                 }
+                if let personId = try await resolveForeignKey("person", from: record, database: database) {
+                    existing.$person.id = personId
+                }
                 try await existing.save(on: database)
                 return
             }
@@ -375,7 +378,7 @@ extension StandardsDALConfiguration {
         let address = Address()
         address.street = street
         address.city = record["city"] as? String ?? ""
-        address.state = record["state"] as? String ?? ""
+        address.state = record["state"] as? String
         address.zip = zip
         address.country = record["country"] as? String ?? "USA"
         address.isVerified = record["is_verified"] as? Bool ?? false
@@ -384,12 +387,16 @@ extension StandardsDALConfiguration {
             address.$entity.id = entityId
         }
 
+        if let personId = try await resolveForeignKey("person", from: record, database: database) {
+            address.$person.id = personId
+        }
+
         try await address.save(on: database)
     }
 
     // MARK: - Mailbox
 
-    static func insertMailbox(
+    public static func insertMailbox(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -432,7 +439,7 @@ extension StandardsDALConfiguration {
 
     // MARK: - PersonEntityRole
 
-    static func insertPersonEntityRole(
+    public static func insertPersonEntityRole(
         record: [String: Any],
         lookupFields: [String],
         database: Database
@@ -602,13 +609,17 @@ extension StandardsDALConfiguration {
         let address = Address()
         address.street = street
         address.city = addressData["city"] as? String ?? ""
-        address.state = addressData["state"] as? String ?? ""
+        address.state = addressData["state"] as? String
         address.zip = zip
         address.country = addressData["country"] as? String ?? "USA"
         address.isVerified = addressData["is_verified"] as? Bool ?? false
 
         if let entityId = try await resolveForeignKey("entity", from: addressData, database: database) {
             address.$entity.id = entityId
+        }
+
+        if let personId = try await resolveForeignKey("person", from: addressData, database: database) {
+            address.$person.id = personId
         }
 
         try await address.save(on: database)
