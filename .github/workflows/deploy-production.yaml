@@ -1,0 +1,83 @@
+name: Deploy to Production
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS credentials for Production
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::978489150794:role/GitHubActionsRole
+          aws-region: us-west-2
+
+      - name: Configure Git for CodeCommit
+        run: |
+          git config --global credential.helper '!aws codecommit credential-helper $@'
+          git config --global credential.UseHttpPath true
+
+      - name: Push to CodeCommit Production
+        run: |
+          echo "Adding CodeCommit remote..."
+          git remote add production https://git-codecommit.us-west-2.amazonaws.com/v1/repos/Standards || true
+
+          echo "Pushing tag ${{ github.ref_name }} to CodeCommit..."
+          git push production ${{ github.ref_name }} --force
+
+          echo "✅ Successfully pushed to production CodeCommit repository"
+          echo "CodeBuild will now build and deploy the Lambda function"
+
+      - name: Report deployment status
+        if: success()
+        run: |
+          echo "::notice::Production deployment initiated for tag ${{ github.ref_name }}"
+          echo "Monitor CodeBuild progress: https://us-west-2.console.aws.amazon.com/codesuite/codebuild/978489150794/projects/StandardsMigrationBuilder"
+
+  deploy-neonlaw:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure AWS credentials for NeonLaw
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::102186460229:role/GitHubActionsRole
+          aws-region: us-west-2
+
+      - name: Configure Git for CodeCommit
+        run: |
+          git config --global credential.helper '!aws codecommit credential-helper $@'
+          git config --global credential.UseHttpPath true
+
+      - name: Push to CodeCommit NeonLaw
+        run: |
+          echo "Adding CodeCommit remote..."
+          git remote add neonlaw https://git-codecommit.us-west-2.amazonaws.com/v1/repos/Standards || true
+
+          echo "Pushing tag ${{ github.ref_name }} to CodeCommit..."
+          git push neonlaw ${{ github.ref_name }} --force
+
+          echo "✅ Successfully pushed to neonlaw CodeCommit repository"
+          echo "CodeBuild will now build and deploy the Lambda function"
+
+      - name: Report deployment status
+        if: success()
+        run: |
+          echo "::notice::NeonLaw deployment initiated for tag ${{ github.ref_name }}"
+          echo "Monitor CodeBuild progress: https://us-west-2.console.aws.amazon.com/codesuite/codebuild/102186460229/projects/StandardsMigrationBuilder"

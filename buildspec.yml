@@ -1,0 +1,100 @@
+version: 0.2
+
+# CodeBuild buildspec for building Swift Lambda on Amazon Linux 2023 ARM64
+# This buildspec:
+# 1. Installs Swift 6.0.3 for Amazon Linux 2023 ARM64
+# 2. Builds the MigrationRunner Lambda function in release mode
+# 3. Packages it as a Lambda deployment zip
+# 4. Uploads to S3
+# 5. Updates the Lambda function
+# 6. Invokes the Lambda to run migrations
+
+env:
+  variables:
+    SWIFT_VERSION: "6.2.3"
+    SWIFT_PLATFORM: "amazonlinux2"
+    SWIFT_ARCH: "aarch64"
+
+phases:
+  install:
+    commands:
+      - echo "Installing Swift ${SWIFT_VERSION} for ${SWIFT_PLATFORM} ${SWIFT_ARCH}"
+      - |
+        # Download and install Swift
+        SWIFT_URL="https://download.swift.org/swift-${SWIFT_VERSION}-release/amazonlinux2-aarch64/swift-${SWIFT_VERSION}-RELEASE/swift-${SWIFT_VERSION}-RELEASE-amazonlinux2-aarch64.tar.gz"
+        curl -L -o swift.tar.gz "$SWIFT_URL"
+        tar xzf swift.tar.gz
+        export PATH="$(pwd)/swift-${SWIFT_VERSION}-RELEASE-amazonlinux2-aarch64/usr/bin:$PATH"
+        swift --version
+
+  pre_build:
+    commands:
+      - echo "Resolving Swift package dependencies..."
+      - swift package resolve
+
+  build:
+    commands:
+      - echo "Building MigrationRunner in release mode for ARM64..."
+      - swift build -c release --product MigrationRunner --arch arm64
+
+  post_build:
+    commands:
+      - echo "Packaging Lambda deployment zip..."
+      - |
+        # Create lambda deployment package
+        cd .build/release
+        cp MigrationRunner bootstrap
+        zip -j lambda.zip bootstrap
+
+      - echo "Uploading to S3..."
+      - |
+        TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+        S3_KEY="lambda-${TIMESTAMP}.zip"
+        aws s3 cp lambda.zip "s3://${S3_BUCKET}/${S3_KEY}"
+        aws s3 cp lambda.zip "s3://${S3_BUCKET}/lambda-latest.zip"
+
+      - echo "Updating Lambda function code..."
+      - |
+        aws lambda update-function-code \
+          --function-name "${LAMBDA_FUNCTION_NAME}" \
+          --s3-bucket "${S3_BUCKET}" \
+          --s3-key "lambda-latest.zip" \
+          --region "${AWS_REGION}"
+
+      - echo "Waiting for Lambda to be ready..."
+      - |
+        aws lambda wait function-updated \
+          --function-name "${LAMBDA_FUNCTION_NAME}" \
+          --region "${AWS_REGION}"
+
+      - echo "Invoking Lambda to run migrations..."
+      - |
+        aws lambda invoke \
+          --function-name "${LAMBDA_FUNCTION_NAME}" \
+          --region "${AWS_REGION}" \
+          --log-type Tail \
+          --query 'LogResult' \
+          --output text \
+          response.json | base64 --decode
+
+      - echo "Migration response:"
+      - cat response.json
+      - |
+        # Check if migration was successful
+        if grep -q '"success":true' response.json || grep -q '"statusCode":200' response.json; then
+          echo "✅ Migration completed successfully!"
+          exit 0
+        else
+          echo "❌ Migration failed!"
+          cat response.json
+          exit 1
+        fi
+
+artifacts:
+  files:
+    - response.json
+  name: migration-results
+
+cache:
+  paths:
+    - '.build/**/*'
