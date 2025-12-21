@@ -70,6 +70,36 @@ repositories.
 standards sync
 ```
 
+### `standards pdf <file>`
+
+Converts a standard Markdown file to PDF format. The command validates the file
+first (same as `standards lint`), strips the YAML frontmatter, and generates a
+PDF with:
+
+- Standard American letter size (8.5 x 11 inches)
+- 1-inch margins on all sides
+- Professional typography
+
+The PDF is created in the same directory as the input file with a `.pdf`
+extension.
+
+```bash
+# Convert a standard to PDF
+standards pdf nevada.md
+
+# Output: nevada.pdf (in the same directory)
+```
+
+**Requirements:**
+
+- Input file must be a valid standard with YAML frontmatter
+- All lines must be ≤120 characters
+- Must have a `title` field in frontmatter
+- Requires `pandoc` to be installed: `brew install pandoc`
+
+**Note:** If validation fails, the command will display detailed error messages
+and refuse to generate the PDF until issues are fixed.
+
 ## Development
 
 Run tests:

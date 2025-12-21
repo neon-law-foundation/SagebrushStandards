@@ -15,6 +15,8 @@ func printUsage() {
           sync                        Sync all projects (git pull existing repos)
           zip [directory]             Convert Markdown files to .docx, zip them, and open Mail.app
                                       Excludes README.md files
+          pdf <file>                  Convert a standard Markdown file to PDF
+                                      Validates the file first, strips frontmatter, and outputs to .pdf
 
         Examples:
           standards lint .
@@ -24,6 +26,7 @@ func printUsage() {
           standards sync
           standards zip
           standards zip SagebrushHoldingCompany
+          standards pdf nevada.md
         """
     )
 }
@@ -68,6 +71,15 @@ Task {
         case "zip":
             let directoryPath = arguments.count > 2 ? arguments[2] : "."
             command = ZipCommand(directoryPath: directoryPath)
+
+        case "pdf":
+            guard arguments.count > 2 else {
+                print("Error: Missing file argument for pdf command")
+                print("Usage: standards pdf <file>")
+                exit(1)
+            }
+            let filePath = arguments[2]
+            command = PDFCommand(inputPath: filePath)
 
         case "--help", "-h":
             printUsage()
