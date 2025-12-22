@@ -39,3 +39,4 @@ jobs:
           download-url: https://github.com/neon-law-foundation/Notations/releases/download/${{ github.ref_name }}/${{ github.ref_name }}.tar.gz
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
