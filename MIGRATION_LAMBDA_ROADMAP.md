@@ -2,11 +2,13 @@
 
 ## Overview
 
-This document outlines the complete implementation plan for deploying a Swift-based Lambda function that runs Fluent migrations and seeds PostgreSQL databases across three AWS accounts (staging, production, neonlaw).
+This document outlines the complete implementation plan for deploying a Swift-based Lambda function
+that runs Fluent migrations and seeds PostgreSQL databases across three AWS accounts (staging,
+production, neonlaw).
 
 ## Architecture
 
-```
+```text
 GitHub (NeonLawFoundation/Standards)
     ↓ (GitHub Actions + OIDC)
 CodeCommit (Standards repository in each account)
@@ -23,12 +25,14 @@ Aurora PostgreSQL (Runs migrations & seeds)
 ## Progress Tracker
 
 ### ✅ Phase 1: Foundation (COMPLETED)
+
 - [x] Copy seed YAML files from Luxe to Standards
 - [x] Add Yams and AWS Lambda Runtime dependencies to Package.swift
 - [x] Create MigrationRunner executable target
 - [x] Add Seeds directory as Package resource
 
 ### 🚧 Phase 2: Seeding Logic (IN PROGRESS)
+
 - [ ] Add complete seed loading logic to StandardsDAL/DatabaseConfiguration.swift
   - Copy seed parsing from Luxe/Dali/DatabaseConfiguration.swift
   - Adapt model-specific insert functions for Standards models
@@ -36,6 +40,7 @@ Aurora PostgreSQL (Runs migrations & seeds)
   - Handle foreign key resolution for nested YAML references
 
 ### 📋 Phase 3: Local Testing with TDD
+
 - [ ] Create Docker Compose file for local PostgreSQL
 - [ ] Write integration tests for MigrationRunner
   - Test migrations run successfully
@@ -46,6 +51,7 @@ Aurora PostgreSQL (Runs migrations & seeds)
 - [ ] **COMMIT**: "Add seeding logic and local tests"
 
 ### 📋 Phase 4: AWS Infrastructure - CloudFormation Stacks
+
 - [ ] Create CodeBuildStack.swift in AWS repo
   - Buildspec for compiling Swift on Amazon Linux 2023
   - ARM64 architecture (Graviton)
@@ -71,6 +77,7 @@ Aurora PostgreSQL (Runs migrations & seeds)
 ### 📋 Phase 5: Deploy Infrastructure to AWS
 
 #### 5.1: Deploy OIDC and CodeCommit
+
 ```bash
 # Deploy OIDC provider to staging account
 ENV=production swift run AWS create-github-oidc \
@@ -90,6 +97,7 @@ ENV=production swift run AWS create-codecommit \
 ```
 
 #### 5.2: Deploy Aurora Databases
+
 ```bash
 # Note: Currently blocked by IAM permissions
 # Must update SagebrushCLIRole with Secrets Manager permissions first
@@ -126,6 +134,7 @@ ENV=production swift run AWS create-aurora-postgres \
 ```
 
 #### 5.3: Deploy S3, CodeBuild, and Lambda
+
 ```bash
 # For each account, deploy in order:
 
@@ -158,7 +167,9 @@ ENV=production swift run AWS create-codebuild \
 ### 📋 Phase 6: GitHub Actions Workflows
 
 #### 6.1: Staging (Push to main)
+
 Create `.github/workflows/deploy-staging.yaml`:
+
 ```yaml
 name: Deploy to Staging
 
@@ -188,7 +199,9 @@ jobs:
 ```
 
 #### 6.2: Production & NeonLaw (Tagged releases)
+
 Create `.github/workflows/deploy-production.yaml`:
+
 ```yaml
 name: Deploy to Production
 
@@ -234,6 +247,7 @@ jobs:
 ```
 
 ### 📋 Phase 7: End-to-End Testing
+
 - [ ] Test staging deployment:
   1. Push to main branch
   2. Verify GitHub Actions runs
@@ -249,6 +263,7 @@ jobs:
 - [ ] **COMMIT**: "Complete GitHub Actions workflows"
 
 ### 📋 Phase 8: Documentation
+
 - [ ] Update Standards README.md with:
   - Lambda migration system overview
   - Local development with Docker PostgreSQL
@@ -259,36 +274,48 @@ jobs:
 ## Key Design Decisions
 
 ### 1. OIDC vs IAM Users
+
 **Decision**: Use OIDC with GitHub Actions
+
 - **Why**: No long-lived credentials, more secure, modern best practice
 - **Permissions**: Only `codecommit:GitPush` and `codecommit:GitPull`
 
 ### 2. Lambda Architecture
+
 **Decision**: ARM64 (Graviton)
+
 - **Why**: Better price/performance, matches ScheduledReporting pattern
 - **Runtime**: `provided.al2023` (custom Swift runtime)
 
 ### 3. Database Credentials
+
 **Decision**: AWS Secrets Manager with cross-account access
+
 - **Why**: Auto-generated passwords, rotation support, secure
 - **Access**: Housekeeping account can read secrets from other accounts
 
 ### 4. Migration Trigger
+
 **Decision**: Manual invocation in CodeBuild buildspec
+
 - **Why**: Explicit control, visible in build logs, fail-fast on errors
 
 ### 5. Seed Data Format
+
 **Decision**: YAML files with lookup_fields for upsert
+
 - **Why**: Human-readable, matches existing Luxe pattern, supports nested references
 
 ## Testing Strategy
 
 ### Local Testing
+
 1. **Unit Tests**: Test YAML parsing, model insertion logic
 2. **Integration Tests**: Test against Docker PostgreSQL
 3. **LocalStack Tests**: Test CloudFormation stack creation
 
 ### AWS Testing (Staging First)
+
 1. Deploy to staging account first
 2. Run manual tests
 3. Verify in Aurora console
@@ -297,6 +324,7 @@ jobs:
 ## Rollback Plan
 
 If migration fails:
+
 1. Lambda logs available in CloudWatch
 2. Aurora snapshot taken before migration (7-day retention)
 3. Can restore from snapshot if needed
@@ -318,6 +346,7 @@ If migration fails:
 
 ## Next Steps
 
-I'm currently at **Phase 2: Seeding Logic**. The next action is to add the complete seed loading implementation to DatabaseConfiguration.swift.
+I'm currently at **Phase 2: Seeding Logic**. The next action is to add the complete seed loading
+implementation to DatabaseConfiguration.swift.
 
 Should I continue with this implementation plan, or would you like to adjust the approach?

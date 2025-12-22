@@ -5,6 +5,7 @@ This guide explains how to test the Standards migration and seeding system local
 ## Overview
 
 The Standards package includes comprehensive integration tests that verify:
+
 - Database migrations run successfully
 - Seeds load correctly from YAML files
 - Upsert behavior works (lookup_fields)
@@ -27,6 +28,7 @@ swift test
 ```
 
 This runs all tests including:
+
 - `MigrationIntegrationTests` - Comprehensive tests with SQLite
 - `PostgresIntegrationTests` - Skipped unless PostgreSQL is available
 
@@ -69,6 +71,7 @@ Fast tests using SQLite in-memory databases. These tests verify:
 - ✅ Idempotent seed loading (can run seeds multiple times)
 
 Example:
+
 ```bash
 swift test --filter MigrationIntegrationTests
 ```
@@ -82,6 +85,7 @@ Tests against real PostgreSQL database. These tests verify:
 - ✅ Data integrity in production-like environment
 
 Example:
+
 ```bash
 ENV=production DATABASE_HOST=localhost swift test --filter PostgresIntegrationTests
 ```
@@ -210,6 +214,7 @@ docker-compose up -d
 ## Next Steps
 
 After local testing succeeds:
+
 1. Commit changes to git
 2. Push to `main` branch
 3. GitHub Actions will deploy to staging

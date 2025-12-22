@@ -66,8 +66,17 @@ standards voice ShookFamily/Estate
 
 ### `standards setup`
 
-Creates the `~/Standards` directory structure and fetches all projects from the
-Sagebrush API.
+Creates the `~/Standards` directory structure and fetches all client files from
+the Sagebrush API.
+
+When you run this command, you receive all client files stored in AWS CodeCommit
+repositories that you have access to. For example, if you're a member of the law
+firm Neon Law, you will receive all client files stored in the Neon Law AWS
+account.
+
+**Important:** Sagebrush manages the AWS infrastructure and code repositories
+for law firms, but cannot access the client data itself. Only lawyers with
+proper credentials can access client files.
 
 ```bash
 standards setup
@@ -218,11 +227,13 @@ sequenceDiagram
 ### Quick Deploy
 
 **Staging (auto-deploy):**
+
 ```bash
 git push origin main
 ```
 
 **Production (manual tag):**
+
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
@@ -231,7 +242,7 @@ git push origin v1.0.0
 ### Monitoring
 
 | Environment | GitHub Actions | CodeBuild | Lambda |
-|-------------|---------------|-----------|--------|
+| ----------- | -------------- | --------- | ------ |
 | **Staging** | [Workflow](https://github.com/neon-law-foundation/Standards/actions/workflows/deploy-staging.yaml) | [Project](https://us-west-2.console.aws.amazon.com/codesuite/codebuild/889786867297/projects/StandardsMigrationBuilder) | [Function](https://us-west-2.console.aws.amazon.com/lambda/home?region=us-west-2#/functions/MigrationRunner) |
 | **Production** | [Workflow](https://github.com/neon-law-foundation/Standards/actions/workflows/deploy-production.yaml) | [Project](https://us-west-2.console.aws.amazon.com/codesuite/codebuild/978489150794/projects/StandardsMigrationBuilder) | Switch to account 978489150794 |
 | **NeonLaw** | Same as Production | [Project](https://us-west-2.console.aws.amazon.com/codesuite/codebuild/102186460229/projects/StandardsMigrationBuilder) | Switch to account 102186460229 |
@@ -239,28 +250,33 @@ git push origin v1.0.0
 ### Troubleshooting
 
 **GitHub Actions fails (AccessDenied):**
+
 ```bash
 # Check OIDC role exists
 aws iam get-role --role-name GitHubActionsRole --profile sagebrush-staging
 ```
 
 **CodeBuild doesn't start:**
+
 ```bash
 # Check EventBridge rule
 aws events list-rules --name-prefix CodeCommit --profile sagebrush-staging
 ```
 
 **Swift version mismatch:**
+
 - Update `buildspec.yml` SWIFT_VERSION to match `Package.swift` swift-tools-version
 - Current: Swift 6.2.3
 
 **Lambda can't connect to database:**
+
 ```bash
 # Check Lambda logs
 aws logs tail /aws/lambda/MigrationRunner --follow --profile sagebrush-staging
 ```
 
 **Migrations fail:**
+
 ```sql
 -- Check which migrations ran
 SELECT * FROM fluent_migrations ORDER BY batch DESC;
@@ -269,6 +285,7 @@ SELECT * FROM fluent_migrations ORDER BY batch DESC;
 ### Rollback
 
 **Lambda:**
+
 ```bash
 # List versions
 aws lambda list-versions-by-function --function-name MigrationRunner \
@@ -282,6 +299,7 @@ aws lambda update-function-code --function-name MigrationRunner \
 ```
 
 **Database:**
+
 ```bash
 # Restore from automatic snapshot (created before each migration)
 aws rds describe-db-cluster-snapshots \
