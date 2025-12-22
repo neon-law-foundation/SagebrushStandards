@@ -5,6 +5,18 @@ contracts.
 
 ## Installation
 
+### Via Homebrew (Recommended)
+
+```bash
+# Add the tap
+brew tap neon-law-foundation/tap
+
+# Install the Standards CLI
+brew install standards
+```
+
+### Manual Installation
+
 ```bash
 ./install.sh
 ```

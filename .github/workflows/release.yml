@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+jobs:
+  release:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build universal binary
+        run: swift build -c release --arch arm64 --arch x86_64 --product StandardsCLI
+
+      - name: Compress archive
+        run: tar -czf ${{ github.ref_name }}.tar.gz -C .build/apple/Products/Release StandardsCLI
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ${{ github.ref_name }}.tar.gz
+          token: ${{ secrets.GITHUB_TOKEN }}
+          generate_release_notes: true
+
+      - name: Update Homebrew Formula
+        uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: standards
+          homebrew-tap: neon-law-foundation/homebrew-tap
+          base-branch: main
+          download-url: https://github.com/neon-law-foundation/Standards/releases/download/${{ github.ref_name }}/${{ github.ref_name }}.tar.gz
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
