@@ -12,6 +12,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: '6.2'
+
       - name: Build universal binary
         run: swift build -c release --arch arm64 --arch x86_64 --product StandardsCLI
 
@@ -31,6 +36,6 @@ jobs:
           formula-name: standards
           homebrew-tap: neon-law-foundation/homebrew-tap
           base-branch: main
-          download-url: https://github.com/neon-law-foundation/Standards/releases/download/${{ github.ref_name }}/${{ github.ref_name }}.tar.gz
+          download-url: https://github.com/neon-law-foundation/Notations/releases/download/${{ github.ref_name }}/${{ github.ref_name }}.tar.gz
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
