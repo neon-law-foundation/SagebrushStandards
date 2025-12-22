@@ -31,12 +31,42 @@ jobs:
           generate_release_notes: true
 
       - name: Update Homebrew Formula
-        uses: mislav/bump-homebrew-formula-action@v3
-        with:
-          formula-name: standards
-          homebrew-tap: neon-law-foundation/homebrew-tap
-          base-branch: main
-          download-url: https://github.com/neon-law-foundation/Notations/releases/download/${{ github.ref_name }}/${{ github.ref_name }}.tar.gz
-        env:
-          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          # Calculate SHA256 of the release tarball
+          SHA256=$(shasum -a 256 ${{ github.ref_name }}.tar.gz | awk '{print $1}')
+          echo "SHA256: $SHA256"
+
+          # Clone the tap repository
+          git clone https://x-access-token:${{ secrets.HOMEBREW_TAP_TOKEN }}@github.com/neon-law-foundation/homebrew-tap.git tap-repo
+          cd tap-repo
+
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Update the formula
+          cat > Formula/standards.rb << 'EOF'
+          class Standards < Formula
+            desc "Legal standards CLI for Markdown linting, PDF conversion, and document management"
+            homepage "https://github.com/neon-law-foundation/Notations"
+            version "${{ github.ref_name }}"
+            url "https://github.com/neon-law-foundation/Notations/releases/download/${{ github.ref_name }}/${{ github.ref_name }}.tar.gz"
+            sha256 "SHA256_PLACEHOLDER"
+
+            def install
+              bin.install "StandardsCLI" => "standards"
+            end
+
+            test do
+              system "#{bin}/standards", "--help"
+            end
+          end
+          EOF
+
+          # Replace SHA256 placeholder
+          sed -i '' "s/SHA256_PLACEHOLDER/$SHA256/" Formula/standards.rb
+
+          # Commit and push
+          git add Formula/standards.rb
+          git commit -m "standards ${{ github.ref_name }}"
+          git push origin main
