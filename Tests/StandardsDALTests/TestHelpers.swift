@@ -142,4 +142,19 @@ enum TestUtilities {
         address.isVerified = false
         return address
     }
+
+    /// Create a complete owner entity with jurisdiction and entity type
+    static func createTestOwnerEntity(on database: Database) async throws -> Int32 {
+        let jurisdiction = createTestJurisdiction()
+        try await jurisdiction.save(on: database)
+        let jurisdictionID = try jurisdiction.requireID()
+
+        let entityType = createTestEntityType(jurisdictionID: jurisdictionID)
+        try await entityType.save(on: database)
+        let entityTypeID = try entityType.requireID()
+
+        let owner = createTestEntity(legalEntityTypeID: entityTypeID)
+        try await owner.save(on: database)
+        return try owner.requireID()
+    }
 }

@@ -73,7 +73,7 @@ struct VoiceCommand: Command {
     private func runClaudeVoiceCheck(on file: URL) async throws {
         let prompt = """
             Review the file at \(file.path) according to the writing style and tone requirements in \
-            /Users/nick/Code/NLF/Standards/CLAUDE.md.
+            /Users/nick/Trifecta/NLF/SagebrushStandards/CLAUDE.md.
 
             Specifically check for:
             1. Active voice (avoid passive constructions)

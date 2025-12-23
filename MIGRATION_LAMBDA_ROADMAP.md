@@ -9,7 +9,7 @@ production, neonlaw).
 ## Architecture
 
 ```text
-GitHub (NeonLawFoundation/Standards)
+GitHub (neon-law-foundation/SagebrushStandards)
     ↓ (GitHub Actions + OIDC)
 CodeCommit (Standards repository in each account)
     ↓ (CodeCommit trigger)
@@ -84,7 +84,7 @@ ENV=production swift run AWS create-github-oidc \
   --account 889786867297 \
   --region us-west-2 \
   --stack-name GitHubOIDC \
-  --repository NeonLawFoundation/Standards
+  --repository neon-law-foundation/SagebrushStandards
 
 # Create CodeCommit repositories
 ENV=production swift run AWS create-codecommit \

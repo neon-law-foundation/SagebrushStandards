@@ -73,6 +73,8 @@ public struct StandardsDALConfiguration {
         app.migrations.add(CreateAddresses())
         app.migrations.add(CreateMailboxes())
         app.migrations.add(CreatePersonEntityRoles())
+        app.migrations.add(CreateNotations())
+        app.migrations.add(CreateAssignedNotations())
 
         // Run migrations
         try await app.autoMigrate()

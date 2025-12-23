@@ -13,7 +13,7 @@ struct SetupCommand: Command {
         self.apiClient = apiClient
         self.homeDirectory = homeDirectory ?? FileManager.default.homeDirectoryForCurrentUser
         self.templateDirectory =
-            templateDirectory ?? URL(fileURLWithPath: "/Users/nick/Code/NLF/Standards/ClaudeTemplates")
+            templateDirectory ?? URL(fileURLWithPath: "/Users/nick/Trifecta/NLF/SagebrushStandards/ClaudeTemplates")
     }
 
     func run() async throws {
