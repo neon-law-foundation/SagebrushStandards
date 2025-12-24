@@ -57,6 +57,7 @@ struct SeedTests {
             notation.respondentType = .person
             notation.markdownContent = "# NLF Document\n\nThis is owned by Neon Law Foundation."
             notation.frontmatter = ["organization": "Neon Law Foundation", "year": "2024"]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
 
             try await notation.save(on: db)
@@ -170,6 +171,7 @@ struct SeedTests {
             notation.respondentType = .person
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             // NOT setting notation.$owner.id here
 
             // Set default owner before saving

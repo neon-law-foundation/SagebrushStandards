@@ -75,6 +75,10 @@ public struct StandardsDALConfiguration {
         app.migrations.add(CreatePersonEntityRoles())
         app.migrations.add(CreateNotations())
         app.migrations.add(CreateAssignedNotations())
+        app.migrations.add(UpdateAssignedNotationStates())
+        app.migrations.add(AddVersionToNotations())
+        app.migrations.add(CreateGitRepositories())
+        app.migrations.add(AddGitRepositoryToNotations())
 
         // Run migrations
         try await app.autoMigrate()

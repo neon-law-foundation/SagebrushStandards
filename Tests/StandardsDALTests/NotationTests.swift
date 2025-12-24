@@ -7,6 +7,55 @@ import Vapor
 @Suite("Notation and AssignedNotation Tests")
 struct NotationTests {
 
+    @Test("Create notation with version (commit SHA)")
+    func testCreateNotationWithVersion() async throws {
+        try await TestUtilities.withApp { app, db in
+            let ownerID = try await TestUtilities.createTestOwnerEntity(on: db)
+
+            let commitSHA = "abc123def456789012345678901234567890abcd"
+
+            let notation = Notation()
+            notation.title = "Test Notation"
+            notation.description = "A test notation"
+            notation.respondentType = .person
+            notation.markdownContent = "# Test"
+            notation.frontmatter = [:]
+            notation.version = commitSHA
+            notation.$owner.id = ownerID
+
+            try await notation.save(on: db)
+            let notationID = try notation.requireID()
+
+            let fetched = try await Notation.find(notationID, on: db)
+            #expect(fetched?.version == commitSHA, "Version should match commit SHA")
+        }
+    }
+
+    @Test("Notation version field stores full git commit SHA")
+    func testNotationVersionStoresFullCommitSHA() async throws {
+        try await TestUtilities.withApp { app, db in
+            let ownerID = try await TestUtilities.createTestOwnerEntity(on: db)
+
+            // Full 40-character git SHA-1 hash
+            let fullCommitSHA = "0123456789abcdef0123456789abcdef01234567"
+
+            let notation = Notation()
+            notation.title = "Versioned Notation"
+            notation.description = "Test"
+            notation.respondentType = .person
+            notation.markdownContent = "# Content"
+            notation.frontmatter = [:]
+            notation.version = fullCommitSHA
+            notation.$owner.id = ownerID
+
+            try await notation.save(on: db)
+
+            let fetched = try await Notation.find(notation.id, on: db)
+            #expect(fetched?.version == fullCommitSHA, "Should store full 40-character SHA")
+            #expect(fetched?.version.count == 40, "SHA should be 40 characters")
+        }
+    }
+
     @Test("Create notation with person respondent type")
     func testCreateNotationForPerson() async throws {
         try await TestUtilities.withApp { app, db in
@@ -19,6 +68,7 @@ struct NotationTests {
             notation.respondentType = .person
             notation.markdownContent = "# Sample Markdown\n\nThis is a test."
             notation.frontmatter = ["author": "Test", "date": "2024-01-01"]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
 
             try await notation.save(on: db)
@@ -29,8 +79,14 @@ struct NotationTests {
             #expect(fetched != nil, "Notation should be retrievable")
             #expect(fetched?.respondentType == .person, "Respondent type should be person")
             #expect(fetched?.title == "Person Notation", "Title should match")
-            #expect(fetched?.markdownContent == "# Sample Markdown\n\nThis is a test.", "Markdown should match")
-            #expect(fetched?.frontmatter["author"] == "Test", "Frontmatter should be stored correctly")
+            #expect(
+                fetched?.markdownContent == "# Sample Markdown\n\nThis is a test.",
+                "Markdown should match"
+            )
+            #expect(
+                fetched?.frontmatter["author"] == "Test",
+                "Frontmatter should be stored correctly"
+            )
             #expect(fetched?.$owner.id == ownerID, "Owner ID should match")
         }
     }
@@ -46,6 +102,7 @@ struct NotationTests {
             notation.respondentType = .entity
             notation.markdownContent = "# Entity Document"
             notation.frontmatter = ["type": "corporate"]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
 
             try await notation.save(on: db)
@@ -68,6 +125,7 @@ struct NotationTests {
             notation.respondentType = .personAndEntity
             notation.markdownContent = "# Combined Document"
             notation.frontmatter = ["category": "hybrid"]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
 
             try await notation.save(on: db)
@@ -75,7 +133,10 @@ struct NotationTests {
             #expect(notationID > 0, "Notation should be created with valid ID")
 
             let fetched = try await Notation.find(notationID, on: db)
-            #expect(fetched?.respondentType == .personAndEntity, "Respondent type should be person_and_entity")
+            #expect(
+                fetched?.respondentType == .personAndEntity,
+                "Respondent type should be person_and_entity"
+            )
         }
     }
 
@@ -96,6 +157,7 @@ struct NotationTests {
             notation.respondentType = .person
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
@@ -150,6 +212,7 @@ struct NotationTests {
             notation.respondentType = .person
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
@@ -193,6 +256,7 @@ struct NotationTests {
             notation.respondentType = .entity
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
@@ -245,6 +309,7 @@ struct NotationTests {
             notation.respondentType = .entity
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
@@ -292,6 +357,7 @@ struct NotationTests {
             notation.respondentType = .personAndEntity
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
@@ -340,6 +406,7 @@ struct NotationTests {
             notation.respondentType = .personAndEntity
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
@@ -375,6 +442,7 @@ struct NotationTests {
             notation.respondentType = .personAndEntity
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
@@ -410,6 +478,7 @@ struct NotationTests {
             notation.respondentType = .person
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
@@ -463,6 +532,7 @@ struct NotationTests {
             notation.respondentType = .person
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
@@ -516,6 +586,7 @@ struct NotationTests {
             notation.respondentType = .person
             notation.markdownContent = "# Test"
             notation.frontmatter = [:]
+            notation.version = "abc123def456789012345678901234567890abcd"
             notation.$owner.id = ownerID
             try await notation.save(on: db)
             let notationID = try notation.requireID()
