@@ -34,7 +34,7 @@ struct LintCommand: Command {
 
         if allValid {
             print("✓ All Markdown files have lines of 120 characters or less")
-            print("✓ All Markdown files have frontmatter with title")
+            print("✓ All Markdown files have frontmatter with title and respondent_type")
         } else {
             // Print line length violations
             if !markdownResult.isValid {
@@ -98,7 +98,7 @@ struct LintCommand: Command {
 
                     if newMarkdownResult.isValid && newFrontmatterResult.isValid {
                         print("✓ All Markdown files now have lines of 120 characters or less")
-                        print("✓ All Markdown files have frontmatter with title")
+                        print("✓ All Markdown files have frontmatter with title and respondent_type")
                     } else {
                         if !newMarkdownResult.isValid {
                             print("⚠️  Some line length violations could not be fixed automatically:")
@@ -125,7 +125,7 @@ struct LintCommand: Command {
                                         of: url.path + "/",
                                         with: ""
                                     )
-                                print("  \(relativePath): must add frontmatter with title manually")
+                                print("  \(relativePath): must add frontmatter with title and respondent_type manually")
                             }
                         }
                         throw CommandError.lintFailed
@@ -157,14 +157,17 @@ struct LintCommand: Command {
                     instructions += """
 
                         Frontmatter Violations:
-                        All Markdown files must have YAML frontmatter with a title field. To fix these violations:
+                        All Markdown files must have YAML frontmatter with a title field and a respondent_type field.
+                        To fix these violations:
 
                         1. Add frontmatter at the beginning of the file
                         2. Include a 'title' field with a non-empty value
+                        3. Include a 'respondent_type' field with one of: entity, person, person_and_entity
 
                         Example:
                         ---
                         title: Document Title Here
+                        respondent_type: person
                         ---
 
                         # Your content here

@@ -1,6 +1,6 @@
 ---
 title: Nevada Trust
-respondent_type: org
+respondent_type: entity
 code: nevada_trust
 flow:
   BEGIN:

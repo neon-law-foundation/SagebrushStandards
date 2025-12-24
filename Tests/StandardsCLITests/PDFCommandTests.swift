@@ -14,7 +14,7 @@ struct PDFCommandTests {
         let validContent = """
             ---
             title: Test Standard
-            respondent_type: org
+            respondent_type: entity
             code: test_standard
             flow:
               BEGIN:
@@ -69,7 +69,7 @@ struct PDFCommandTests {
 
         let invalidContent = """
             ---
-            respondent_type: org
+            respondent_type: person
             code: test_standard
             ---
 
@@ -97,6 +97,7 @@ struct PDFCommandTests {
         let invalidContent = """
             ---
             title: Test Standard
+            respondent_type: entity
             ---
 
             ## Test Content
@@ -148,7 +149,7 @@ struct PDFCommandTests {
             title: Test Standard
             code: test
             description: Test
-            respondent_type: org
+            respondent_type: person
             flow:
               BEGIN:
                 _: END
@@ -184,7 +185,7 @@ struct PDFCommandTests {
             title: Test Standard
             code: test
             description: Test
-            respondent_type: org
+            respondent_type: person_and_entity
             flow:
               BEGIN:
                 _: END
@@ -217,7 +218,7 @@ struct PDFCommandTests {
             title: Test Standard
             code: test
             description: Test
-            respondent_type: org
+            respondent_type: entity
             flow:
               BEGIN:
                 _: END

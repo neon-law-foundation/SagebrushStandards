@@ -27,6 +27,7 @@ struct FrontmatterValidatorTests {
         let content = """
             ---
             title: My Document Title
+            respondent_type: person
             ---
 
             # Content here
@@ -46,6 +47,7 @@ struct FrontmatterValidatorTests {
         let content = """
             ---
             title: My Document Title
+            respondent_type: entity
             author: John Doe
             date: 2025-12-20
             ---
@@ -91,8 +93,9 @@ struct FrontmatterValidatorTests {
         try content.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let violations = try validator.validateFile(at: fileURL)
-        #expect(violations.count == 1)
-        #expect(violations[0].type == .missingTitle)
+        #expect(violations.count == 2)
+        #expect(violations.contains { $0.type == .missingTitle })
+        #expect(violations.contains { $0.type == .missingRespondentType })
     }
 
     @Test("File with frontmatter but no title field fails validation")
@@ -112,8 +115,9 @@ struct FrontmatterValidatorTests {
         try content.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let violations = try validator.validateFile(at: fileURL)
-        #expect(violations.count == 1)
-        #expect(violations[0].type == .missingTitle)
+        #expect(violations.count == 2)
+        #expect(violations.contains { $0.type == .missingTitle })
+        #expect(violations.contains { $0.type == .missingRespondentType })
     }
 
     @Test("File with empty title value fails validation")
@@ -132,8 +136,9 @@ struct FrontmatterValidatorTests {
         try content.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let violations = try validator.validateFile(at: fileURL)
-        #expect(violations.count == 1)
-        #expect(violations[0].type == .missingTitle)
+        #expect(violations.count == 2)
+        #expect(violations.contains { $0.type == .missingTitle })
+        #expect(violations.contains { $0.type == .missingRespondentType })
     }
 
     @Test("File with whitespace-only title fails validation")
@@ -152,8 +157,9 @@ struct FrontmatterValidatorTests {
         try content.write(to: fileURL, atomically: true, encoding: .utf8)
 
         let violations = try validator.validateFile(at: fileURL)
-        #expect(violations.count == 1)
-        #expect(violations[0].type == .missingTitle)
+        #expect(violations.count == 2)
+        #expect(violations.contains { $0.type == .missingTitle })
+        #expect(violations.contains { $0.type == .missingRespondentType })
     }
 
     @Test("README.md files are excluded from frontmatter validation")
@@ -188,6 +194,7 @@ struct FrontmatterValidatorTests {
         try """
         ---
         title: Valid Document
+        respondent_type: person
         ---
 
         # Content
@@ -227,6 +234,7 @@ struct FrontmatterValidatorTests {
         try """
         ---
         title: Document 1
+        respondent_type: entity
         ---
 
         # Content 1
@@ -235,6 +243,7 @@ struct FrontmatterValidatorTests {
         try """
         ---
         title: Document 2
+        respondent_type: person
         ---
 
         # Content 2
@@ -255,5 +264,191 @@ struct FrontmatterValidatorTests {
         #expect(throws: ValidationError.self) {
             try validator.validateFile(at: nonExistentURL)
         }
+    }
+
+    @Test("Valid file with title and respondent_type 'entity' passes validation")
+    func validFileWithTitleAndRespondentTypeEntity() throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        let fileURL = testDir.appendingPathComponent("valid.md")
+        let content = """
+            ---
+            title: My Document Title
+            respondent_type: entity
+            ---
+
+            # Content here
+            """
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        let violations = try validator.validateFile(at: fileURL)
+        #expect(violations.isEmpty)
+    }
+
+    @Test("Valid file with title and respondent_type 'person' passes validation")
+    func validFileWithTitleAndRespondentTypePerson() throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        let fileURL = testDir.appendingPathComponent("valid.md")
+        let content = """
+            ---
+            title: My Document Title
+            respondent_type: person
+            ---
+
+            # Content here
+            """
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        let violations = try validator.validateFile(at: fileURL)
+        #expect(violations.isEmpty)
+    }
+
+    @Test("Valid file with title and respondent_type 'person_and_entity' passes validation")
+    func validFileWithTitleAndRespondentTypePersonAndEntity() throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        let fileURL = testDir.appendingPathComponent("valid.md")
+        let content = """
+            ---
+            title: My Document Title
+            respondent_type: person_and_entity
+            ---
+
+            # Content here
+            """
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        let violations = try validator.validateFile(at: fileURL)
+        #expect(violations.isEmpty)
+    }
+
+    @Test("File with title but missing respondent_type fails validation")
+    func fileWithTitleButMissingRespondentTypeFails() throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        let fileURL = testDir.appendingPathComponent("no-respondent-type.md")
+        let content = """
+            ---
+            title: My Document Title
+            ---
+
+            # Content here
+            """
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        let violations = try validator.validateFile(at: fileURL)
+        #expect(violations.count == 1)
+        #expect(violations[0].type == .missingRespondentType)
+    }
+
+    @Test("File with empty respondent_type fails validation")
+    func fileWithEmptyRespondentTypeFails() throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        let fileURL = testDir.appendingPathComponent("empty-respondent-type.md")
+        let content = """
+            ---
+            title: My Document Title
+            respondent_type:
+            ---
+
+            # Content here
+            """
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        let violations = try validator.validateFile(at: fileURL)
+        #expect(violations.count == 1)
+        #expect(violations[0].type == .missingRespondentType)
+    }
+
+    @Test("File with invalid respondent_type 'company' fails validation")
+    func fileWithInvalidRespondentTypeCompany() throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        let fileURL = testDir.appendingPathComponent("invalid-respondent-type.md")
+        let content = """
+            ---
+            title: My Document Title
+            respondent_type: company
+            ---
+
+            # Content here
+            """
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        let violations = try validator.validateFile(at: fileURL)
+        #expect(violations.count == 1)
+        #expect(violations[0].type == .invalidRespondentType("company"))
+    }
+
+    @Test("File with invalid respondent_type 'organization' fails validation")
+    func fileWithInvalidRespondentTypeOrganization() throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        let fileURL = testDir.appendingPathComponent("invalid-respondent-type.md")
+        let content = """
+            ---
+            title: My Document Title
+            respondent_type: organization
+            ---
+
+            # Content here
+            """
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        let violations = try validator.validateFile(at: fileURL)
+        #expect(violations.count == 1)
+        #expect(violations[0].type == .invalidRespondentType("organization"))
+    }
+
+    @Test("File with missing title and missing respondent_type reports both violations")
+    func fileWithMissingTitleAndMissingRespondentType() throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        let fileURL = testDir.appendingPathComponent("missing-both.md")
+        let content = """
+            ---
+            author: John Doe
+            ---
+
+            # Content here
+            """
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        let violations = try validator.validateFile(at: fileURL)
+        #expect(violations.count == 2)
+        #expect(violations.contains { $0.type == .missingTitle })
+        #expect(violations.contains { $0.type == .missingRespondentType })
+    }
+
+    @Test("File with missing title and invalid respondent_type reports both violations")
+    func fileWithMissingTitleAndInvalidRespondentType() throws {
+        let testDir = try createTestDirectory()
+        defer { cleanupTestDirectory(testDir) }
+
+        let fileURL = testDir.appendingPathComponent("missing-title-invalid-type.md")
+        let content = """
+            ---
+            author: John Doe
+            respondent_type: invalid_value
+            ---
+
+            # Content here
+            """
+        try content.write(to: fileURL, atomically: true, encoding: .utf8)
+
+        let violations = try validator.validateFile(at: fileURL)
+        #expect(violations.count == 2)
+        #expect(violations.contains { $0.type == .missingTitle })
+        #expect(violations.contains { $0.type == .invalidRespondentType("invalid_value") })
     }
 }

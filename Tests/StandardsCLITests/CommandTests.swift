@@ -25,6 +25,7 @@ struct CommandTests {
         try """
         ---
         title: Test Document
+        respondent_type: person
         ---
 
         # Short content
@@ -92,6 +93,7 @@ struct CommandTests {
         try """
         ---
         title: Documentation
+        respondent_type: entity
         ---
 
         # Documentation
@@ -119,6 +121,7 @@ struct CommandTests {
         try """
         ---
         title: Documentation
+        respondent_type: person
         ---
 
         # Documentation
