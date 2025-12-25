@@ -18,36 +18,38 @@ struct PDFCommand: Command {
 
         print("📄 Validating standard: \(fileURL.lastPathComponent)")
 
-        let markdownValidator = MarkdownValidator()
-        let frontmatterValidator = FrontmatterValidator()
+        let s101 = S101_LineLength()
+        let f101 = F101_TitleRequired()
+        let f102 = F102_RespondentTypeRequired()
 
-        let markdownViolations = try markdownValidator.validateFile(at: fileURL)
-        let frontmatterViolations = try frontmatterValidator.validateFile(at: fileURL)
+        let s101Violations = try s101.validate(file: fileURL)
+        let f101Violations = try f101.validate(file: fileURL)
+        let f102Violations = try f102.validate(file: fileURL)
 
-        let hasMarkdownViolations = !markdownViolations.isEmpty
-        let hasFrontmatterViolations = !frontmatterViolations.isEmpty
+        let allViolations = s101Violations + f101Violations + f102Violations
 
-        if hasMarkdownViolations || hasFrontmatterViolations {
+        if !allViolations.isEmpty {
             print("✗ Validation failed:\n")
 
-            if hasMarkdownViolations {
-                print("Line length violations:")
-                for violation in markdownViolations {
-                    print(
-                        "  Line \(violation.lineNumber): \(violation.length) characters "
-                            + "(exceeds \(violation.maxLength))"
-                    )
-                }
-                print("")
-            }
+            for violation in allViolations {
+                var parts = ["[\(violation.ruleCode)]"]
 
-            if hasFrontmatterViolations {
-                print("Frontmatter violations:")
-                for violation in frontmatterViolations {
-                    print("  \(violation.type.message)")
+                if let line = violation.line {
+                    parts.append("Line \(line):")
                 }
-                print("")
+
+                parts.append(violation.message)
+
+                if let context = violation.context, !context.isEmpty {
+                    let contextStr = context.map { "\($0.key): \($0.value)" }.joined(
+                        separator: ", "
+                    )
+                    parts.append("(\(contextStr))")
+                }
+
+                print("  " + parts.joined(separator: " "))
             }
+            print("")
 
             print("Please fix these violations before generating PDF.")
             print("Run 'standards lint \(fileURL.path)' for more details.")

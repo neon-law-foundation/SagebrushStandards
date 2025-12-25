@@ -33,7 +33,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ### `standards lint <directory> [--fix]`
 
-Validates that all Markdown files (except README.md) have lines ≤120 characters.
+Validates Markdown files against a set of style and frontmatter rules.
 
 ```bash
 # Check current directory
@@ -42,11 +42,24 @@ standards lint .
 # Check specific directory
 standards lint ShookFamily/Estate
 
-# Auto-fix violations
+# Auto-fix violations (only S101 is auto-fixable)
 standards lint . --fix
 ```
 
-**Note:** README.md files are excluded from linting.
+**Rules:**
+
+- **S101**: Line length must not exceed 120 characters (auto-fixable with `--fix`)
+- **F101**: Frontmatter must contain a non-empty `title` field (manual fix required)
+- **F102**: Frontmatter must contain a valid `respondent_type` field: `entity`, `person`,
+  or `person_and_entity` (manual fix required)
+
+**Configuration:**
+
+This CLI follows an "omakase" philosophy with opinionated defaults and no configuration
+file. All rules are enabled, and all violations are errors. This ensures consistency
+across all standards.
+
+**Note:** README.md and CLAUDE.md files are excluded from linting.
 
 ### `standards voice <directory>`
 
