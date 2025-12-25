@@ -31,7 +31,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ## Commands
 
-### `standards lint <directory> [--fix]`
+### `standards lint <directory>`
 
 Validates Markdown files against a set of style and frontmatter rules.
 
@@ -41,17 +41,14 @@ standards lint .
 
 # Check specific directory
 standards lint ShookFamily/Estate
-
-# Auto-fix violations (only S101 is auto-fixable)
-standards lint . --fix
 ```
 
 **Rules:**
 
-- **S101**: Line length must not exceed 120 characters (auto-fixable with `--fix`)
-- **F101**: Frontmatter must contain a non-empty `title` field (manual fix required)
+- **S101**: Line length must not exceed 120 characters
+- **F101**: Frontmatter must contain a non-empty `title` field
 - **F102**: Frontmatter must contain a valid `respondent_type` field: `entity`, `person`,
-  or `person_and_entity` (manual fix required)
+  or `person_and_entity`
 
 **Configuration:**
 
@@ -61,48 +58,37 @@ across all standards.
 
 **Note:** README.md and CLAUDE.md files are excluded from linting.
 
-### `standards voice <directory>`
+## Initial Setup
 
-Checks Markdown files (except README.md) for active voice and tone compliance
-according to the writing guidelines in
-CLAUDE.md.
+Before using the `standards` CLI commands, you need to set up your `~/Standards`
+directory structure. This is typically done using a setup script in `~/.standards/`:
 
-```bash
-# Check current directory
-standards voice .
+### `~/.standards/` Directory
 
-# Check specific directory
-standards voice ShookFamily/Estate
-```
+The `~/.standards/` directory contains:
 
-**Note:** README.md files are excluded from voice checking.
+- **`setup.sh`** - Shell script to initialize `~/Standards` and clone project repositories
+- **`CLAUDE.md`** - Style guide template for legal contract writing
+- **`.claude/`** - Claude Code configuration (agents, commands, etc.)
 
-### `standards setup`
-
-Creates the `~/Standards` directory structure and fetches all client files from
-the Sagebrush API.
-
-When you run this command, you receive all client files stored in AWS CodeCommit
-repositories that you have access to. For example, if you're a member of the law
-firm Neon Law, you will receive all client files stored in the Neon Law AWS
-account.
-
-**Important:** Sagebrush manages the AWS infrastructure and code repositories
-for law firms, but cannot access the client data itself. Only lawyers with
-proper credentials can access client files.
+### Running Setup
 
 ```bash
-standards setup
+# Initialize ~/Standards directory and clone all project repositories
+~/.standards/setup.sh
 ```
 
-### `standards sync`
+This setup script will:
 
-Syncs all projects in `~/Standards` by running `git pull` on existing
-repositories.
+1. Create the `~/Standards` directory if it doesn't exist
+2. Clone or update git repositories from your configured sources (CodeCommit, GitHub, etc.)
+3. Copy the CLAUDE.md style guide to `~/Standards/CLAUDE.md`
 
-```bash
-standards sync
-```
+**Note:** The setup script should be customized with your specific repository
+URLs and access credentials. Contact your administrator for the appropriate
+configuration.
+
+## Commands
 
 ### `standards pdf <file>`
 
@@ -135,12 +121,6 @@ standards pdf nevada.md
 and refuse to generate the PDF until issues are fixed.
 
 ## Development
-
-Run tests:
-
-```bash
-swift test
-```
 
 Build the project:
 

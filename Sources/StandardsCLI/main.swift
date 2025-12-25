@@ -8,24 +8,12 @@ func printUsage() {
         Usage: standards <command> [arguments]
 
         Commands:
-          lint <directory> [--fix]    Validate Markdown files have lines ≤120 characters
-                                      Use --fix to automatically correct violations
-          voice <directory>           Check Markdown files for active voice and tone compliance
-          setup                       Create ~/Standards structure and fetch projects
-          sync                        Sync all projects (git pull existing repos)
-          zip [directory]             Convert Markdown files to .docx, zip them, and open Mail.app
-                                      Excludes README.md files
-          pdf <file>                  Convert a standard Markdown file to PDF
-                                      Validates the file first, strips frontmatter, and outputs to .pdf
+          lint <directory>    Validate Markdown files have lines ≤120 characters
+          pdf <file>          Convert a standard Markdown file to PDF
+                              Validates the file first, strips frontmatter, and outputs to .pdf
 
         Examples:
           standards lint .
-          standards lint . --fix
-          standards voice ShookFamily/Estate
-          standards setup
-          standards sync
-          standards zip
-          standards zip SagebrushHoldingCompany
           standards pdf nevada.md
         """
     )
@@ -43,34 +31,8 @@ Task {
 
         switch commandName {
         case "lint":
-            var directoryPath = "."
-            var fix = false
-
-            // Parse arguments for lint command
-            for i in 2..<arguments.count {
-                let arg = arguments[i]
-                if arg == "--fix" {
-                    fix = true
-                } else if !arg.starts(with: "-") {
-                    directoryPath = arg
-                }
-            }
-
-            command = LintCommand(directoryPath: directoryPath, fix: fix)
-
-        case "voice":
             let directoryPath = arguments.count > 2 ? arguments[2] : "."
-            command = VoiceCommand(directoryPath: directoryPath)
-
-        case "setup":
-            command = SetupCommand()
-
-        case "sync":
-            command = SyncCommand()
-
-        case "zip":
-            let directoryPath = arguments.count > 2 ? arguments[2] : "."
-            command = ZipCommand(directoryPath: directoryPath)
+            command = LintCommand(directoryPath: directoryPath)
 
         case "pdf":
             guard arguments.count > 2 else {

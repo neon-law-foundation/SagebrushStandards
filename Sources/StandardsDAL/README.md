@@ -8,7 +8,6 @@ Data Access Layer for Standards application with Fluent ORM support.
 - **15 Database Migrations** with foreign keys and constraints
 - **16 Repositories** with domain-specific queries
 - **Environment-based Database Configuration** (ENV variable)
-- **Full Test Coverage** with Swift Testing
 
 ## Database Configuration
 
@@ -54,20 +53,6 @@ let person = Person()
 person.name = "John Doe"
 person.email = "john@example.com"
 try await personRepo.create(model: person)
-```
-
-### Testing Usage
-
-```swift
-import StandardsDAL
-import Vapor
-
-let app = try await Application.make(.testing)
-
-// Forces SQLite in-memory configuration
-try await StandardsDALConfiguration.configureForTesting(app)
-
-// Run tests...
 ```
 
 ### Production
@@ -144,16 +129,6 @@ let person = try await repo.findByEmail("john@example.com")
 - **MailboxRepository**: `findByAddress(addressId:)`, `findActive()`
 - **PersonEntityRoleRepository**: `findByPerson(personId:)`,
   `findByEntity(entityId:)`, `findByRole(_:)`
-
-## Testing
-
-Run tests:
-
-```bash
-swift test
-```
-
-All tests use in-memory SQLite and are fully isolated.
 
 ## Migration Order
 

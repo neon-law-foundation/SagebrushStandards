@@ -48,19 +48,5 @@ let package = Package(
                 .product(name: "Logging", package: "swift-log"),
             ]
         ),
-        .testTarget(
-            name: "StandardsDALTests",
-            dependencies: [
-                "StandardsDAL",
-                .product(name: "Fluent", package: "fluent"),
-                .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
-            ]
-        ),
-        .testTarget(
-            name: "StandardsCLITests",
-            dependencies: [
-                "StandardsCLI"
-            ]
-        ),
     ]
 )

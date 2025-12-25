@@ -2,7 +2,6 @@ import Foundation
 
 struct LintCommand: Command {
     let directoryPath: String
-    let fix: Bool
 
     func run() async throws {
         let url: URL
@@ -60,45 +59,7 @@ struct LintCommand: Command {
                 print("")
             }
 
-            if fix {
-                print("\n🔧 Auto-fixing violations...\n")
-
-                let fixResult = try await engine.fix(directory: url)
-
-                if !fixResult.filesFixed.isEmpty {
-                    print(
-                        "✓ Fixed \(fixResult.violationsFixed) violation(s) in \(fixResult.filesFixed.count) file(s)\n"
-                    )
-                    for file in fixResult.filesFixed {
-                        let relativePath = makeRelativePath(file, from: url)
-                        print("  Fixed: \(relativePath)")
-                    }
-                    print("\n✓ Auto-fix complete. Running validation again...\n")
-                } else {
-                    print("⚠️  No auto-fixable violations found\n")
-                }
-
-                let newResult = try engine.lint(directory: url)
-
-                if newResult.isValid {
-                    print("✓ All Markdown files now pass all rules")
-                } else {
-                    print(
-                        "⚠️  \(newResult.totalViolationCount) violation(s) remaining (some violations cannot be auto-fixed):\n"
-                    )
-                    for fileViolation in newResult.fileViolations {
-                        let relativePath = makeRelativePath(fileViolation.file, from: url)
-                        print("  \(relativePath): \(fileViolation.violations.count) violation(s)")
-                    }
-                    throw CommandError.lintFailed
-                }
-            } else {
-                print(
-                    "\n💡 Run 'standards lint \(directoryPath) --fix' to automatically fix S101 violations"
-                )
-                print("   Note: F101 and F102 violations must be fixed manually\n")
-                throw CommandError.lintFailed
-            }
+            throw CommandError.lintFailed
         }
     }
 
@@ -114,7 +75,6 @@ enum CommandError: Error, LocalizedError {
     case unknownCommand(String)
     case missingArgument(String)
     case setupFailed(String)
-    case voiceCheckFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -128,8 +88,6 @@ enum CommandError: Error, LocalizedError {
             return "Missing argument: \(arg)"
         case .setupFailed(let reason):
             return "Setup failed: \(reason)"
-        case .voiceCheckFailed(let file):
-            return "Voice check failed for file: \(file)"
         }
     }
 }
