@@ -58,6 +58,119 @@ across all standards.
 
 **Note:** README.md and CLAUDE.md files are excluded from linting.
 
+### `standards import <directory>`
+
+Validates and imports markdown notation files into a database. The import command
+first validates all files in the directory using the same rules as `lint`, then
+imports only valid files into an in-memory SQLite database.
+
+```bash
+# Import notations from a directory
+standards import ./notations --repo 1 --version abc123
+
+# Import with git repository ID and commit SHA
+standards import ~/Standards/ShookFamily --repo 5 --version e4f2a91c
+```
+
+**Options:**
+
+- `--repo <id>` - Git repository ID (required)
+- `--version <sha>` - Git commit SHA version (required)
+
+**Process:**
+
+1. Validates all markdown files using F101, F102 rules
+2. If validation fails, reports errors and exits
+3. If validation passes, parses frontmatter and content
+4. Creates Notation records in database with validation
+5. Reports import results for each file
+
+**Example Output:**
+
+```
+📋 Validating markdown files in: ./notations
+✅ All files valid. Starting import to database...
+
+✅ Imported: contractor-agreement.md -> contractor-agreement - Contractor Agreement
+✅ Imported: nda.md -> nda - Non-Disclosure Agreement
+
+==================================================
+📊 Import Summary:
+   ✅ Successfully imported: 2 notation(s)
+==================================================
+```
+
+## Architecture
+
+The Standards project is organized into three main Swift Package Manager targets:
+
+### StandardsRules
+
+Lightweight validation rules library with zero external dependencies.
+
+- **Location**: `Sources/StandardsRules/`
+- **Purpose**: Shared validation logic for markdown files
+- **Dependencies**: None (Foundation only)
+- **Key Components**:
+  - `Rule` protocol - Defines validation rules
+  - `FixableRule` protocol - Rules that can auto-fix violations
+  - `Violation` types - Structured error reporting
+  - `FrontmatterParser` - YAML frontmatter parsing utility
+  - Rule implementations (F101, F102, S101)
+
+### StandardsDAL
+
+Data Access Layer using Fluent ORM for database operations.
+
+- **Location**: `Sources/StandardsDAL/`
+- **Purpose**: Database models, migrations, and services
+- **Dependencies**: Fluent, FluentPostgresDriver, FluentSQLiteDriver, Vapor, StandardsRules
+- **Key Components**:
+  - Fluent models (Notation, Entity, Person, etc.)
+  - Database migrations
+  - Service layer (NotationService, NotationValidator)
+  - Repositories for data access
+  - Validation at model layer using StandardsRules
+
+**Validation Strategy:**
+
+The DAL validates data using Swift code (not database constraints) following Fluent best practices:
+
+- Database constraints: Only for referential integrity (foreign keys, uniqueness)
+- Swift validations: For business rules (format, content, relationships)
+- Better error messages and type safety
+- Cross-database compatibility (SQLite, PostgreSQL)
+
+### StandardsCLI
+
+Command-line interface for linting and importing notations.
+
+- **Location**: `Sources/StandardsCLI/`
+- **Purpose**: Interactive CLI tools
+- **Dependencies**: StandardsRules, StandardsDAL, Logging
+- **Key Components**:
+  - `LintCommand` - File validation
+  - `ImportCommand` - Database import
+  - `PDFCommand` - PDF generation
+  - `DatabaseManager` - In-memory SQLite management
+  - `NotationImporter` - Markdown to database importer
+
+**Dependency Flow:**
+
+```
+StandardsCLI
+    ├── StandardsRules (validation)
+    └── StandardsDAL (persistence)
+            └── StandardsRules (validation)
+```
+
+This architecture enables:
+
+1. **Code Reuse**: Same validation rules in CLI and DAL
+2. **Single Source of Truth**: Rules defined once, used everywhere
+3. **Testability**: Each layer tested independently
+4. **Type Safety**: Swift compiler enforces correct usage
+
 ## Initial Setup
 
 Before using the `standards` CLI commands, you need to set up your `~/Standards`
