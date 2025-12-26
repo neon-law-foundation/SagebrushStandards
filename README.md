@@ -61,33 +61,47 @@ across all standards.
 ### `standards import <directory>`
 
 Validates and imports markdown notation files into a database. The import command
-first validates all files in the directory using the same rules as `lint`, then
-imports only valid files into an in-memory SQLite database.
+automatically detects the git repository and commit SHA from the directory, validates
+all markdown files, then imports only valid files into an in-memory SQLite database.
 
 ```bash
-# Import notations from a directory
-standards import ./notations --repo 1 --version abc123
+# Import notations from current directory
+standards import .
 
-# Import with git repository ID and commit SHA
-standards import ~/Standards/ShookFamily --repo 5 --version e4f2a91c
+# Import from specific directory
+standards import ./notations
 ```
 
-**Options:**
+**Requirements:**
 
-- `--repo <id>` - Git repository ID (required)
-- `--version <sha>` - Git commit SHA version (required)
+- Directory must be a git repository
+- Repository must have a remote origin configured
+- Working tree must be clean (no uncommitted changes)
+- All markdown files must pass F101, F102 validation
+
+**Automatic Detection:**
+
+- **Git Repository ID**: Derived from `git remote get-url origin` (hashed to Int32)
+- **Git Commit SHA**: Current HEAD commit (`git rev-parse HEAD`)
 
 **Process:**
 
-1. Validates all markdown files using F101, F102 rules
-2. If validation fails, reports errors and exits
-3. If validation passes, parses frontmatter and content
-4. Creates Notation records in database with validation
-5. Reports import results for each file
+1. Checks if directory is a git repository
+2. Fails fast if there are uncommitted changes
+3. Detects git repository ID and current commit SHA
+4. Validates all markdown files using F101, F102 rules
+5. If validation fails, reports errors and exits
+6. If validation passes, parses frontmatter and content
+7. Creates Notation records in database with validation
+8. Reports import results for each file
 
 **Example Output:**
 
 ```
+📋 Checking git repository status...
+📦 Git Repository ID: 1234567890
+📝 Git Commit SHA: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+
 📋 Validating markdown files in: ./notations
 ✅ All files valid. Starting import to database...
 
@@ -98,6 +112,21 @@ standards import ~/Standards/ShookFamily --repo 5 --version e4f2a91c
 📊 Import Summary:
    ✅ Successfully imported: 2 notation(s)
 ==================================================
+```
+
+**Error Cases:**
+
+```bash
+# Not a git repository
+❌ Error: /path/to/dir is not a git repository
+   Run 'git init' to initialize a repository first
+
+# Uncommitted changes
+❌ Error: Repository has uncommitted changes
+   Commit or stash your changes before importing
+
+# No remote origin
+❌ Error: No remote origin configured
 ```
 
 ## Architecture

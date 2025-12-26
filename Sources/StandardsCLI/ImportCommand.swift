@@ -5,8 +5,6 @@ import StandardsRules
 
 struct ImportCommand: Command {
     let directoryPath: String
-    let gitRepositoryID: Int32
-    let version: String
 
     func run() async throws {
         let logger = Logger(label: "standards-cli")
@@ -26,6 +24,26 @@ struct ImportCommand: Command {
             throw CommandError.invalidDirectory(directoryPath)
         }
 
+        print("📋 Checking git repository status...")
+
+        guard try isGitRepository(at: url) else {
+            print("❌ Error: \(url.path) is not a git repository")
+            print("   Run 'git init' to initialize a repository first")
+            throw CommandError.setupFailed("Not a git repository")
+        }
+
+        guard try !hasUncommittedChanges(at: url) else {
+            print("❌ Error: Repository has uncommitted changes")
+            print("   Commit or stash your changes before importing")
+            throw CommandError.setupFailed("Uncommitted changes detected")
+        }
+
+        let gitRepositoryID = try getGitRepositoryID(at: url)
+        let version = try getCurrentCommitSHA(at: url)
+
+        print("📦 Git Repository ID: \(gitRepositoryID)")
+        print("📝 Git Commit SHA: \(version)")
+        print("")
         print("📋 Validating markdown files in: \(url.path)")
 
         let rules: [Rule] = [
@@ -133,6 +151,102 @@ struct ImportCommand: Command {
             files.append(fileURL)
         }
         return files
+    }
+
+    private func isGitRepository(at directory: URL) throws -> Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        process.arguments = ["-C", directory.path, "rev-parse", "--git-dir"]
+        process.standardOutput = Pipe()
+        process.standardError = Pipe()
+
+        try process.run()
+        process.waitUntilExit()
+
+        return process.terminationStatus == 0
+    }
+
+    private func hasUncommittedChanges(at directory: URL) throws -> Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        process.arguments = ["-C", directory.path, "status", "--porcelain"]
+
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = Pipe()
+
+        try process.run()
+        process.waitUntilExit()
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let output = String(data: data, encoding: .utf8) ?? ""
+
+        return !output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func getCurrentCommitSHA(at directory: URL) throws -> String {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        process.arguments = ["-C", directory.path, "rev-parse", "HEAD"]
+
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = Pipe()
+
+        try process.run()
+        process.waitUntilExit()
+
+        guard process.terminationStatus == 0 else {
+            throw CommandError.setupFailed("Failed to get current commit SHA")
+        }
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let sha = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        guard !sha.isEmpty else {
+            throw CommandError.setupFailed("No commits found in repository")
+        }
+
+        return sha
+    }
+
+    private func getGitRepositoryID(at directory: URL) throws -> Int32 {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        process.arguments = ["-C", directory.path, "remote", "get-url", "origin"]
+
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = Pipe()
+
+        try process.run()
+        process.waitUntilExit()
+
+        guard process.terminationStatus == 0 else {
+            throw CommandError.setupFailed("Failed to get git remote origin URL")
+        }
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        let remoteURL = String(data: data, encoding: .utf8)?
+            .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+
+        guard !remoteURL.isEmpty else {
+            throw CommandError.setupFailed("No remote origin configured")
+        }
+
+        let repoID = hashRepositoryURL(remoteURL)
+        return repoID
+    }
+
+    private func hashRepositoryURL(_ url: String) -> Int32 {
+        var hash: UInt32 = 5381
+
+        for byte in url.utf8 {
+            hash = ((hash << 5) &+ hash) &+ UInt32(byte)
+        }
+
+        return Int32(bitPattern: hash) & Int32.max
     }
 
     private func makeRelativePath(_ file: URL, from base: URL) -> String {

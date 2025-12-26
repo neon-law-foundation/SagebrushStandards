@@ -8,15 +8,16 @@ func printUsage() {
         Usage: standards <command> [arguments]
 
         Commands:
-          lint <directory>                Validate Markdown files have lines ≤120 characters
-          import <directory> --repo <id> --version <sha>
-                                          Import validated Markdown notations to database
-          pdf <file>                      Convert a standard Markdown file to PDF
-                                          Validates the file first, strips frontmatter, and outputs to .pdf
+          lint <directory>    Validate Markdown files have lines ≤120 characters
+          import <directory>  Import validated Markdown notations to database
+                              Auto-detects git repository and commit SHA
+                              Requires clean working tree (no uncommitted changes)
+          pdf <file>          Convert a standard Markdown file to PDF
+                              Validates the file first, strips frontmatter, and outputs to .pdf
 
         Examples:
           standards lint .
-          standards import ./notations --repo 1 --version abc123
+          standards import ./notations
           standards pdf nevada.md
         """
     )
@@ -38,46 +39,8 @@ Task {
             command = LintCommand(directoryPath: directoryPath)
 
         case "import":
-            guard arguments.count > 2 else {
-                print("Error: Missing directory argument for import command")
-                print("Usage: standards import <directory> --repo <id> --version <sha>")
-                exit(1)
-            }
-
-            let directoryPath = arguments[2]
-            var gitRepositoryID: Int32?
-            var version: String?
-
-            var i = 3
-            while i < arguments.count {
-                if arguments[i] == "--repo", i + 1 < arguments.count {
-                    gitRepositoryID = Int32(arguments[i + 1])
-                    i += 2
-                } else if arguments[i] == "--version", i + 1 < arguments.count {
-                    version = arguments[i + 1]
-                    i += 2
-                } else {
-                    i += 1
-                }
-            }
-
-            guard let repoID = gitRepositoryID else {
-                print("Error: Missing --repo argument")
-                print("Usage: standards import <directory> --repo <id> --version <sha>")
-                exit(1)
-            }
-
-            guard let ver = version else {
-                print("Error: Missing --version argument")
-                print("Usage: standards import <directory> --repo <id> --version <sha>")
-                exit(1)
-            }
-
-            command = ImportCommand(
-                directoryPath: directoryPath,
-                gitRepositoryID: repoID,
-                version: ver
-            )
+            let directoryPath = arguments.count > 2 ? arguments[2] : "."
+            command = ImportCommand(directoryPath: directoryPath)
 
         case "pdf":
             guard arguments.count > 2 else {
