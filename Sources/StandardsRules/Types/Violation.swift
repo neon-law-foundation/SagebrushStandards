@@ -1,7 +1,7 @@
 import Foundation
 
 /// A unified violation type for all rules
-public struct Violation: Equatable {
+public struct Violation: Equatable, Sendable {
     /// Machine-readable rule code (e.g., "S101", "F101")
     public let ruleCode: String
 
@@ -28,7 +28,7 @@ public struct Violation: Equatable {
 }
 
 /// Results for a single file
-public struct FileViolations: Equatable {
+public struct FileViolations: Equatable, Sendable {
     public let file: URL
     public let violations: [Violation]
 
@@ -43,7 +43,7 @@ public struct FileViolations: Equatable {
 }
 
 /// Aggregated results across all files
-public struct LintResult {
+public struct LintResult: Sendable {
     public let fileViolations: [FileViolations]
 
     public var isValid: Bool {

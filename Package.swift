@@ -19,8 +19,13 @@ let package = Package(
     ],
     targets: [
         .target(
+            name: "StandardsRules",
+            dependencies: []
+        ),
+        .target(
             name: "StandardsDAL",
             dependencies: [
+                "StandardsRules",
                 .product(name: "Fluent", package: "fluent"),
                 .product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"),
                 .product(name: "FluentSQLiteDriver", package: "fluent-sqlite-driver"),
@@ -38,7 +43,9 @@ let package = Package(
         ),
         .executableTarget(
             name: "StandardsCLI",
-            dependencies: []
+            dependencies: [
+                "StandardsRules"
+            ]
         ),
         .executableTarget(
             name: "MigrationRunner",

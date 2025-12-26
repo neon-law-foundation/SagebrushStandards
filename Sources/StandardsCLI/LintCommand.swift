@@ -1,4 +1,5 @@
 import Foundation
+import StandardsRules
 
 struct LintCommand: Command {
     let directoryPath: String

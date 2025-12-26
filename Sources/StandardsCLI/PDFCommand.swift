@@ -1,4 +1,5 @@
 import Foundation
+import StandardsRules
 
 struct PDFCommand: Command {
     let inputPath: String

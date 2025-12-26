@@ -1,4 +1,5 @@
 import Foundation
+import StandardsRules
 
 /// Orchestrates rule execution across files
 public struct RuleEngine {
