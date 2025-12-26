@@ -44,7 +44,9 @@ let package = Package(
         .executableTarget(
             name: "StandardsCLI",
             dependencies: [
-                "StandardsRules"
+                "StandardsRules",
+                "StandardsDAL",
+                .product(name: "Logging", package: "swift-log"),
             ]
         ),
         .executableTarget(
