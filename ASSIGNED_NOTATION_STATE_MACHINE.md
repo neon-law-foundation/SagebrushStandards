@@ -2,15 +2,19 @@
 
 ## Overview
 
-This document describes the state machine design for `AssignedNotation` entities, including state transitions, AWS Step Functions integration, retry logic, and database locking strategies to ensure reliable workflow execution.
+This document describes the state machine design for `AssignedNotation`
+entities, including state transitions, AWS Step Functions integration, retry
+logic, and database locking strategies to ensure reliable workflow execution.
 
 ## Current vs. Proposed State Model
 
 ### Current States
+
 - `open` - Notation is assigned but not completed
 - `closed` - Notation is completed
 
 ### Proposed Extended States
+
 - `open` - Initial state when notation is first assigned
 - `review` - Notation response is being reviewed
 - `waiting_for_flow` - Notation is blocked waiting for a dependent flow to complete
@@ -46,15 +50,18 @@ stateDiagram-v2
 
 ### 1. Open State
 
-**Purpose**: Initial assignment state where the respondent needs to complete the notation.
+**Purpose**: Initial assignment state where the respondent needs to complete
+the notation.
 
 **Entry Actions**:
+
 - Validate no duplicate active assignments exist (database check)
 - Create database record with `state = 'open'`
 - Send notification to assignee(s)
 - Record assignment in audit log
 
 **Possible Transitions**:
+
 - → `review`: When respondent submits their response
 - → `waiting_for_flow`: When a dependency on another flow is detected
 - → `waiting_for_alignment`: When alignment with related entities/people is required
@@ -84,9 +91,11 @@ sequenceDiagram
 
 ### 2. Review State
 
-**Purpose**: The response has been submitted and is awaiting review by an authorized reviewer.
+**Purpose**: The response has been submitted and is awaiting review by an
+authorized reviewer.
 
 **Entry Actions**:
+
 - Update state to `review`
 - Capture submitted response data
 - Assign to reviewer queue
@@ -94,6 +103,7 @@ sequenceDiagram
 - Record state change in audit log
 
 **Possible Transitions**:
+
 - → `open`: When reviewer requests changes from the respondent
 - → `waiting_for_alignment`: When reviewer identifies alignment needs
 - → `closed`: When reviewer approves the response
@@ -126,9 +136,11 @@ sequenceDiagram
 
 ### 3. Waiting for Flow State
 
-**Purpose**: The notation is blocked because it depends on another flow or process to complete first.
+**Purpose**: The notation is blocked because it depends on another flow or
+process to complete first.
 
 **Entry Actions**:
+
 - Update state to `waiting_for_flow`
 - Record the blocking flow identifier(s)
 - Register callback/webhook for flow completion
@@ -136,6 +148,7 @@ sequenceDiagram
 - Record dependency in audit log
 
 **Possible Transitions**:
+
 - → `open`: When the blocking flow completes and further action is needed
 - → `closed`: When the blocking flow completes and auto-approval rules are met
 
@@ -164,9 +177,11 @@ sequenceDiagram
 
 ### 4. Waiting for Alignment State
 
-**Purpose**: The notation requires alignment or coordination with other people or entities before it can proceed.
+**Purpose**: The notation requires alignment or coordination with other people
+or entities before it can proceed.
 
 **Entry Actions**:
+
 - Update state to `waiting_for_alignment`
 - Record alignment requirements (who/what needs to align)
 - Send alignment requests to relevant parties
@@ -174,6 +189,7 @@ sequenceDiagram
 - Record alignment requirement in audit log
 
 **Possible Transitions**:
+
 - → `open`: When alignment is completed and respondent needs to update their response
 - → `review`: When alignment is completed and response needs review
 - → `closed`: When alignment is completed and auto-approval rules are met
@@ -211,6 +227,7 @@ sequenceDiagram
 **Purpose**: The notation assignment is complete and finalized.
 
 **Entry Actions**:
+
 - Update state to `closed`
 - Record completion timestamp
 - Archive response data
@@ -582,6 +599,7 @@ public var version: Int32
 ```
 
 **Update Pattern**:
+
 ```swift
 // Pseudo-Swift code for optimistic locking
 func updateState(
@@ -676,13 +694,13 @@ graph LR
 
 ### Retry Configuration by Operation Type
 
-| Operation | Max Attempts | Initial Wait | Backoff Rate | Timeout |
-|-----------|--------------|--------------|--------------|---------|
-| Database Query | 3 | 1s | 2.0 | 10s |
-| Database Write | 5 | 2s | 2.0 | 15s |
-| Notification | 5 | 5s | 2.0 | 30s |
-| External API | 3 | 3s | 2.5 | 20s |
-| Flow Dependency Check | 10 | 10s | 1.5 | 60s |
+| Operation              | Max Attempts | Initial Wait | Backoff Rate | Timeout |
+| ---------------------- | ------------ | ------------ | ------------ | ------- |
+| Database Query         | 3            | 1s           | 2.0          | 10s     |
+| Database Write         | 5            | 2s           | 2.0          | 15s     |
+| Notification           | 5            | 5s           | 2.0          | 30s     |
+| External API           | 3            | 3s           | 2.5          | 20s     |
+| Flow Dependency Check  | 10           | 10s          | 1.5          | 60s     |
 
 ### Error Classification
 
@@ -974,5 +992,6 @@ struct AssignedNotationWorkflowTests {
 
 - [AWS Step Functions Documentation](https://docs.aws.amazon.com/step-functions/)
 - [PostgreSQL Row-Level Locking](https://www.postgresql.org/docs/current/explicit-locking.html)
-- [Idempotency in Distributed Systems](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)
+- [Idempotency in Distributed Systems](
+  https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)
 - [State Machine Pattern](https://refactoring.guru/design-patterns/state)

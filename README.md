@@ -33,101 +33,73 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ### `standards lint <directory>`
 
-Validates Markdown files against a set of style and frontmatter rules.
+Validates Markdown files. **Does not persist to database.**
 
 ```bash
-# Check current directory
 standards lint .
-
-# Check specific directory
 standards lint ShookFamily/Estate
 ```
 
 **Rules:**
 
-- **S101**: Line length must not exceed 120 characters
-- **F101**: Frontmatter must contain a non-empty `title` field
-- **F102**: Frontmatter must contain a valid `respondent_type` field: `entity`, `person`,
-  or `person_and_entity`
+- **S101**: Line length ≤120 characters
+- **F101**: Non-empty `title` in frontmatter
+- **F102**: Valid `respondent_type`: `entity`, `person`, or `person_and_entity`
 
-**Configuration:**
-
-This CLI follows an "omakase" philosophy with opinionated defaults and no configuration
-file. All rules are enabled, and all violations are errors. This ensures consistency
-across all standards.
-
-**Note:** README.md and CLAUDE.md files are excluded from linting.
+README.md and CLAUDE.md files are excluded.
 
 ### `standards import <directory>`
 
-Validates and imports markdown notation files into a database. The import command
-automatically detects the git repository and commit SHA from the directory, validates
-all markdown files, then imports only valid files into an in-memory SQLite database.
+Validates and imports markdown files to in-memory SQLite database. Auto-detects git
+repository and commit SHA.
 
 ```bash
-# Import notations from current directory
 standards import .
-
-# Import from specific directory
 standards import ./notations
 ```
 
 **Requirements:**
 
-- Directory must be a git repository
-- Repository must have a remote origin configured
-- Working tree must be clean (no uncommitted changes)
-- All markdown files must pass F101, F102 validation
+- Git repository with remote origin
+- Clean working tree (no uncommitted changes)
+- Files pass F101, F102 validation
 
-**Automatic Detection:**
+**Auto-Detection:**
 
-- **Git Repository ID**: Derived from `git remote get-url origin` (hashed to Int32)
-- **Git Commit SHA**: Current HEAD commit (`git rev-parse HEAD`)
+- Repository ID: Hashed from `git remote get-url origin`
+- Commit SHA: `git rev-parse HEAD`
 
-**Process:**
+**Example:**
 
-1. Checks if directory is a git repository
-2. Fails fast if there are uncommitted changes
-3. Detects git repository ID and current commit SHA
-4. Validates all markdown files using F101, F102 rules
-5. If validation fails, reports errors and exits
-6. If validation passes, parses frontmatter and content
-7. Creates Notation records in database with validation
-8. Reports import results for each file
-
-**Example Output:**
-
-```
-📋 Checking git repository status...
+```text
 📦 Git Repository ID: 1234567890
-📝 Git Commit SHA: a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
-
-📋 Validating markdown files in: ./notations
-✅ All files valid. Starting import to database...
-
-✅ Imported: contractor-agreement.md -> contractor-agreement - Contractor Agreement
-✅ Imported: nda.md -> nda - Non-Disclosure Agreement
-
-==================================================
-📊 Import Summary:
-   ✅ Successfully imported: 2 notation(s)
-==================================================
+📝 Git Commit SHA: a1b2c3d4...
+✅ All files valid. Starting import...
+✅ Imported: contractor-agreement.md
+✅ Imported: nda.md
+📊 Successfully imported: 2 notation(s)
 ```
 
-**Error Cases:**
+**Errors:**
+
+- Not a git repository
+- Uncommitted changes detected
+- No remote origin configured
+- Validation failures
+
+### `standards pdf <file>`
+
+Validates and converts Markdown file to PDF. Strips frontmatter.
 
 ```bash
-# Not a git repository
-❌ Error: /path/to/dir is not a git repository
-   Run 'git init' to initialize a repository first
-
-# Uncommitted changes
-❌ Error: Repository has uncommitted changes
-   Commit or stash your changes before importing
-
-# No remote origin
-❌ Error: No remote origin configured
+standards pdf nevada.md  # Creates nevada.pdf
 ```
+
+**Requirements:**
+
+- Valid frontmatter with `title` field
+- Lines ≤120 characters
+- `pandoc` installed: `brew install pandoc`
 
 ## Architecture
 
@@ -163,7 +135,8 @@ Data Access Layer using Fluent ORM for database operations.
 
 **Validation Strategy:**
 
-The DAL validates data using Swift code (not database constraints) following Fluent best practices:
+The DAL validates data using Swift code (not database constraints) following
+Fluent best practices:
 
 - Database constraints: Only for referential integrity (foreign keys, uniqueness)
 - Swift validations: For business rules (format, content, relationships)
@@ -186,7 +159,7 @@ Command-line interface for linting and importing notations.
 
 **Dependency Flow:**
 
-```
+```text
 StandardsCLI
     ├── StandardsRules (validation)
     └── StandardsDAL (persistence)
@@ -223,44 +196,12 @@ The `~/.standards/` directory contains:
 This setup script will:
 
 1. Create the `~/Standards` directory if it doesn't exist
-2. Clone or update git repositories from your configured sources (CodeCommit, GitHub, etc.)
+2. Clone or update git repositories from configured sources
 3. Copy the CLAUDE.md style guide to `~/Standards/CLAUDE.md`
 
 **Note:** The setup script should be customized with your specific repository
 URLs and access credentials. Contact your administrator for the appropriate
 configuration.
-
-## Commands
-
-### `standards pdf <file>`
-
-Converts a standard Markdown file to PDF format. The command validates the file
-first (same as `standards lint`), strips the YAML frontmatter, and generates a
-PDF with:
-
-- Standard American letter size (8.5 x 11 inches)
-- 1-inch margins on all sides
-- Professional typography
-
-The PDF is created in the same directory as the input file with a `.pdf`
-extension.
-
-```bash
-# Convert a standard to PDF
-standards pdf nevada.md
-
-# Output: nevada.pdf (in the same directory)
-```
-
-**Requirements:**
-
-- Input file must be a valid standard with YAML frontmatter
-- All lines must be ≤120 characters
-- Must have a `title` field in frontmatter
-- Requires `pandoc` to be installed: `brew install pandoc`
-
-**Note:** If validation fails, the command will display detailed error messages
-and refuse to generate the PDF until issues are fixed.
 
 ## Development
 
@@ -272,7 +213,7 @@ swift build
 
 ## Migration Lambda Deployment
 
-### Architecture
+### Deployment Architecture
 
 ```mermaid
 graph TB

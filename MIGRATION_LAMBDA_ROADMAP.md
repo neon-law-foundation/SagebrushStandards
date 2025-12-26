@@ -2,9 +2,9 @@
 
 ## Overview
 
-This document outlines the complete implementation plan for deploying a Swift-based Lambda function
-that runs Fluent migrations and seeds PostgreSQL databases across three AWS accounts (staging,
-production, neonlaw).
+This document outlines the complete implementation plan for deploying a
+Swift-based Lambda function that runs Fluent migrations and seeds PostgreSQL
+databases across three AWS accounts (staging, production, neonlaw).
 
 ## Architecture
 
@@ -340,13 +340,17 @@ If migration fails:
 
 ## Open Questions
 
-1. ~~Should we deploy Aurora databases now or wait?~~ → Deploy as part of Phase 5
-2. ~~Do we need separate buildspec files for staging vs production?~~ → No, same buildspec
-3. Should migrations be reversible (down migrations)? → Nice-to-have, not required for MVP
+1. ~~Should we deploy Aurora databases now or wait?~~ → Deploy as part of
+   Phase 5
+2. ~~Do we need separate buildspec files for staging vs production?~~ → No,
+   same buildspec
+3. Should migrations be reversible (down migrations)? → Nice-to-have, not
+   required for MVP
 
 ## Next Steps
 
-I'm currently at **Phase 2: Seeding Logic**. The next action is to add the complete seed loading
-implementation to DatabaseConfiguration.swift.
+I'm currently at **Phase 2: Seeding Logic**. The next action is to add the
+complete seed loading implementation to DatabaseConfiguration.swift.
 
-Should I continue with this implementation plan, or would you like to adjust the approach?
+Should I continue with this implementation plan, or would you like to adjust
+the approach?

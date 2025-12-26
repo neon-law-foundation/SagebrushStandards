@@ -55,14 +55,15 @@ that:
 Before:
 
 ```markdown
-This is a very long paragraph that exceeds the 120-character limit and needs to be wrapped properly to comply with the Standards specification.
+This is a very long paragraph that exceeds the 120-character limit and needs
+to be wrapped properly to comply with the Standards specification.
 ```
 
 After:
 
 ```markdown
-This is a very long paragraph that exceeds the 120-character limit and needs to be wrapped properly to comply
-with the Standards specification.
+This is a very long paragraph that exceeds the 120-character limit and needs
+to be wrapped properly to comply with the Standards specification.
 ```
 
 ## Important Notes
